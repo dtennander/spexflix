@@ -9,18 +9,21 @@ import (
 	"google.golang.org/grpc"
 	"log"
 	"net"
+	"os"
 )
 
 type auServer struct {
 	authenticator au.Authenticator
 	sessions      au.SessionPool
+	log           *log.Logger
 }
 
-func createAuService(authenticator au.Authenticator, sessionPool au.SessionPool) *auServer {
-	return &auServer{authenticator: authenticator, sessions: sessionPool}
+func createAuService(authenticator au.Authenticator, sessionPool au.SessionPool, log *log.Logger) *auServer {
+	return &auServer{authenticator: authenticator, sessions: sessionPool, log: log}
 }
 
 func (s *auServer) Login(ctx context.Context, req *api.LoginRequest) (*api.LoginReply, error) {
+	s.log.Printf("Got LoginRequest: %+v", req)
 	username := req.Username
 	password := req.Password
 	success := s.authenticator.Authenticate(username, password)
@@ -33,6 +36,7 @@ func (s *auServer) Login(ctx context.Context, req *api.LoginRequest) (*api.Login
 }
 
 func (s *auServer) Authenticate(ctx context.Context, req *api.AuRequest) (*api.AuReply, error) {
+	s.log.Printf("Got AuRequest: %+v", req)
 	token := req.SessionToken
 	isValid := s.sessions.IsSessionIdValid(token)
 	username, err := s.sessions.GetUsername(token)
@@ -43,7 +47,7 @@ func (s *auServer) Authenticate(ctx context.Context, req *api.AuRequest) (*api.A
 }
 
 func main() {
-	port := flag.Int64("port", 1337, "The port used for grpc connections")
+	port := flag.Int64("port", 31117, "The port used for grpc connections")
 	flag.Parse()
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
@@ -52,7 +56,8 @@ func main() {
 	grpcServer := grpc.NewServer()
 	authenticator := &au.AuthenticatorImpl{}
 	sp := au.SessionPoolImpl{}
-	auService := createAuService(authenticator, sp)
+	logger := log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
+	auService := createAuService(authenticator, sp, logger)
 	api.RegisterAuthenticationServer(grpcServer, auService)
 	grpcServer.Serve(lis)
 }
