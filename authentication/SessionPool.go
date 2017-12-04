@@ -5,7 +5,7 @@ import "errors"
 type SessionPool interface {
 	IsSessionIdValid(sessionId string) bool
 	GetUsername(sessionId string) (string, error)
-	CreateSession(username string) (session *Session)
+	CreateSession(username string) (session *Session, err error)
 }
 
 type SessionPoolImpl map[string]*Session
@@ -26,8 +26,8 @@ func (sp SessionPoolImpl) IsSessionIdValid(sessionId string) bool {
 	}
 }
 
-func (sp SessionPoolImpl) CreateSession(username string) (session *Session) {
-	session = CreateSession(username)
+func (sp SessionPoolImpl) CreateSession(username string) (session *Session, err error) {
+	session, err = CreateSession(username)
 	sp[session.SessionId] = session
-	return session
+	return session, nil
 }

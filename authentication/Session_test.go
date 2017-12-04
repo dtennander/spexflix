@@ -30,8 +30,11 @@ func TestSession_GetUserName(t *testing.T) {
 }
 
 func TestCreateSession(t *testing.T) {
-	newSession := CreateSession(username1)
+	newSession, err := CreateSession(username1)
 	switch {
+	case err != nil:
+		t.Log("Could not create session. Error: " + err.Error())
+		t.Fail()
 	case newSession.Username != username1:
 		t.Log("Usernames do not match!")
 		t.Fail()
@@ -42,7 +45,11 @@ func TestCreateSession(t *testing.T) {
 }
 
 func TestSession_IsActive(t *testing.T) {
-	s := CreateSession("asd")
+	s, err := CreateSession("asd")
+	if err != nil {
+		t.Log(err.Error())
+		t.Fail()
+	}
 	if !s.IsActive() {
 		t.Log("New Session is not active!")
 		t.Fail()

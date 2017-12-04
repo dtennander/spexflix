@@ -10,7 +10,10 @@ const username2 = "asd"
 
 func TestSessionPool_CreateSession(t *testing.T) {
 	// When
-	s := sessionPool.CreateSession(username2)
+	s, err := sessionPool.CreateSession(username2)
+	if err != nil {
+		t.Error("Could not create session.")
+	}
 	switch {
 	case !s.IsActive():
 		t.Fail()
@@ -20,7 +23,10 @@ func TestSessionPool_CreateSession(t *testing.T) {
 }
 
 func TestSessionPoolImpl_GetUsername(t *testing.T) {
-	token := sessionPool.CreateSession(username2)
+	token, err := sessionPool.CreateSession(username2)
+	if err != nil {
+		t.Error("Could not create session.")
+	}
 	name, err := sessionPool.GetUsername(token.SessionId)
 	switch {
 	case err != nil:
@@ -50,7 +56,10 @@ func TestSessionPool_IsSessionIdValid2(t *testing.T) {
 }
 
 func TestSessionPool_IsSessionIdValid(t *testing.T) {
-	s := sessionPool.CreateSession(username2)
+	s, err := sessionPool.CreateSession(username2)
+	if err != nil {
+		t.Error("Could not create session.")
+	}
 	if !sessionPool.IsSessionIdValid(s.SessionId) {
 		t.Fail()
 	}

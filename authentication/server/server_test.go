@@ -5,6 +5,8 @@ import (
 	"github.com/DiTo04/spexflix/authentication/api"
 	"testing"
 	"time"
+	"log"
+	"os"
 )
 
 const (
@@ -12,6 +14,8 @@ const (
 	testUser     = "testUser"
 	testPassword = "testPassword"
 )
+
+var logger *log.Logger = log.New(os.Stdout, "INFO: ", 0)
 
 type sessionPoolMock struct {
 	isValidId   bool
@@ -25,13 +29,13 @@ func (*sessionPoolMock) GetUsername(sessionId string) (string, error) {
 func (sp *sessionPoolMock) IsSessionIdValid(sessionId string) bool {
 	return sp.isValidId
 }
-func (sp *sessionPoolMock) CreateSession(username string) (session *authentication.Session) {
+func (sp *sessionPoolMock) CreateSession(username string) (session *authentication.Session, err error) {
 	sp.createdUser = username
 	return &authentication.Session{
 		Username:       username,
 		ExpirationDate: time.Now().Add(time.Hour),
 		SessionId:      token,
-	}
+	}, nil
 }
 
 type authenticatorMock struct {
@@ -50,7 +54,7 @@ func (a authenticatorMock) Authenticate(user string, password string) bool {
 func TestAuService_Authenticate(t *testing.T) {
 	sessionPoolMock := &sessionPoolMock{isValidId: true}
 	authenticatorMock := authenticatorMock{}
-	target := createAuService(authenticatorMock, sessionPoolMock)
+	target := createAuService(authenticatorMock, sessionPoolMock, logger)
 	req := &api.AuRequest{SessionToken: token}
 	rsp, err := target.Authenticate(nil, req)
 	switch {
@@ -69,7 +73,7 @@ func TestAuService_Authenticate(t *testing.T) {
 func TestAuService_Authenticate2(t *testing.T) {
 	sessionPoolMock := &sessionPoolMock{isValidId: false}
 	authenticatorMock := authenticatorMock{}
-	target := createAuService(authenticatorMock, sessionPoolMock)
+	target := createAuService(authenticatorMock, sessionPoolMock, logger)
 	req := &api.AuRequest{SessionToken: token}
 	rsp, err := target.Authenticate(nil, req)
 	switch {
@@ -88,7 +92,7 @@ func TestAuService_Authenticate2(t *testing.T) {
 func TestAuService_Login(t *testing.T) {
 	sessionPoolMock := &sessionPoolMock{}
 	authenticatorMock := authenticatorMock{shouldAuthenticateTestUser: true}
-	target := createAuService(authenticatorMock, sessionPoolMock)
+	target := createAuService(authenticatorMock, sessionPoolMock, logger)
 	req := &api.LoginRequest{Username: testUser, Password: testPassword}
 	rsp, err := target.Login(nil, req)
 	switch {
@@ -110,7 +114,7 @@ func TestAuService_Login(t *testing.T) {
 func TestAuService_Login2(t *testing.T) {
 	sessionPoolMock := &sessionPoolMock{}
 	authenticatorMock := authenticatorMock{shouldAuthenticateTestUser: false}
-	target := createAuService(authenticatorMock, sessionPoolMock)
+	target := createAuService(authenticatorMock, sessionPoolMock, logger)
 	req := &api.LoginRequest{Username: testUser, Password: testPassword}
 	rsp, err := target.Login(nil, req)
 	switch {

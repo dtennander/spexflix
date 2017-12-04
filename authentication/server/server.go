@@ -29,7 +29,10 @@ func (s *auServer) Login(ctx context.Context, req *api.LoginRequest) (*api.Login
 	success := s.authenticator.Authenticate(username, password)
 	rsp := &api.LoginReply{IsAuthenticated: success}
 	if success {
-		session := s.sessions.CreateSession(username)
+		session, err := s.sessions.CreateSession(username)
+		if err != nil {
+			return nil, err
+		}
 		rsp.SessionToken = session.GetSessionId()
 	}
 	return rsp, nil
