@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	au "github.com/DiTo04/spexflix/authentication"
+	au "github.com/DiTo04/spexflix/authentication/authentication"
 	"github.com/DiTo04/spexflix/authentication/api"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"

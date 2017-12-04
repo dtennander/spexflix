@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"github.com/DiTo04/spexflix/authentication/api"
 	"github.com/DiTo04/spexflix/infrastructure"
 	"google.golang.org/grpc"
@@ -14,7 +13,9 @@ import (
 )
 
 var (
-	serverAddr = flag.String("server_addr", "127.0.0.1:31117", "The server address in the format of host:port")
+	serverAddr = os.Getenv("AUTHENTICATION_SERVER")
+	auPort = os.Getenv("AUTHENTICATION_PORT")
+	logger = log.New(os.Stdout, "INFO: ", log.Ltime|log.Ldate|log.Lshortfile)
 )
 
 type server struct {
@@ -83,13 +84,14 @@ func (s *server) HandleLogin(rw http.ResponseWriter, r *http.Request) {
 func main() {
 	var opt []grpc.DialOption
 	opt = append(opt, grpc.WithInsecure())
-	auConnection, err := grpc.Dial(*serverAddr, opt...)
+	addrAndPort := serverAddr + ":" + auPort
+	logger.Print("Connecting to: " + addrAndPort)
+	auConnection, err := grpc.Dial(addrAndPort, opt...)
 	if err != nil {
 		log.Fatal("Could not dial up au service, %v", err)
 	}
 	auClient := api.NewAuthenticationClient(auConnection)
 	connections := infrastructure.CreateConnection(auClient)
-	logger := log.New(os.Stdout, "INFO: ", log.Ltime|log.Ldate|log.Lshortfile)
 	server := &server{connections: connections, logger: logger}
 	http.ListenAndServe("0.0.0.0:8000", server)
 }
