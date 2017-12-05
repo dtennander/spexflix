@@ -1,9 +1,9 @@
 package authentication
 
 import (
-	"time"
 	"crypto/rand"
 	"encoding/base64"
+	"time"
 )
 
 type Session struct {

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"github.com/DiTo04/spexflix/authentication/api"
-	"github.com/DiTo04/spexflix/infrastructure"
 	"google.golang.org/grpc"
 	"html/template"
 	"io/ioutil"
@@ -14,13 +13,13 @@ import (
 
 var (
 	serverAddr = os.Getenv("AUTHENTICATION_SERVER")
-	auPort = os.Getenv("AUTHENTICATION_PORT")
-	logger = log.New(os.Stdout, "INFO: ", log.Ltime|log.Ldate|log.Lshortfile)
+	auPort     = os.Getenv("AUTHENTICATION_PORT")
+	logger     = log.New(os.Stdout, "INFO: ", log.Ltime|log.Ldate|log.Lshortfile)
 )
 
 type server struct {
-	connections infrastructure.Connections
-	logger      *log.Logger
+	auClient api.AuthenticationClient
+	logger   *log.Logger
 }
 
 func (s *server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
@@ -53,15 +52,15 @@ func (s *server) HandleLogin(rw http.ResponseWriter, r *http.Request) {
 		password := r.Form.Get("password")
 		req := &api.LoginRequest{Username: username, Password: password}
 		ctx := context.Background()
-		rsp, err := s.connections.GetAuthenticationClient().Login(ctx, req)
+		rsp, err := s.auClient.Login(ctx, req)
 		switch {
 		case err != nil:
 			s.logger.Print(err.Error())
 			http.Error(rw, "Could not authenticate", http.StatusInternalServerError)
-			break;
+			break
 		case !rsp.IsAuthenticated:
 			http.Error(rw, "Invalid credentials", http.StatusNotAcceptable)
-			break;
+			break
 		default:
 			s.logger.Print(rsp.SessionToken)
 			cookie := &http.Cookie{
@@ -91,7 +90,6 @@ func main() {
 		log.Fatal("Could not dial up au service, %v", err)
 	}
 	auClient := api.NewAuthenticationClient(auConnection)
-	connections := infrastructure.CreateConnection(auClient)
-	server := &server{connections: connections, logger: logger}
+	server := &server{auClient: auClient, logger: logger}
 	http.ListenAndServe("0.0.0.0:8000", server)
 }

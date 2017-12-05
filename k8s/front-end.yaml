@@ -25,3 +25,17 @@ spec:
           value: "authentication"
         - name: AUTHENTICATION_PORT
           value: "31117"
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: front-end
+spec:
+  selector:
+    app: gateway
+  type: NodePort
+  ports:
+  - name: web
+    protocol: TCP
+    port: 80
+    targetPort: web

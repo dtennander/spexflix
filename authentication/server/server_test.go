@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/DiTo04/spexflix/authentication/authentication"
 	"github.com/DiTo04/spexflix/authentication/api"
-	"testing"
-	"time"
+	"github.com/DiTo04/spexflix/authentication/authentication"
 	"log"
 	"os"
+	"testing"
+	"time"
 )
 
 const (
