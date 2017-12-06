@@ -1,14 +1,14 @@
 package main
 
 import (
-	"net/http"
-	"strings"
+	"encoding/json"
 	"github.com/DiTo04/spexflix/authentication/api"
 	"golang.org/x/net/context"
-	"encoding/json"
-	"log"
-	"os"
 	"google.golang.org/grpc"
+	"log"
+	"net/http"
+	"os"
+	"strings"
 )
 
 var (
@@ -18,28 +18,29 @@ var (
 
 type content struct {
 	Username string `json:"username"`
-	Content string `json:"content"`
+	Content  string `json:"content"`
 }
 
 const contentMessage = "Välkommen till Spexflix!"
 
 func getContentForUser(user string) content {
-	return content{Username:user, Content: contentMessage}
+	return content{Username: user, Content: contentMessage}
 }
 
 func getApiHandler(auClient api.AuthenticationClient) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		log.Print("Got Request!")
 		s := strings.Split(r.RequestURI, "/")
 		sessionToken := s[len(s)-1]
 		ctx := context.Background()
 		req := &api.AuRequest{SessionToken: sessionToken}
 		rsp, err := auClient.Authenticate(ctx, req)
 		if err != nil {
-			http.Error(w,"Internal error", http.StatusInternalServerError)
+			http.Error(w, "Internal error", http.StatusInternalServerError)
 			return
 		}
 		if !rsp.IsAuthenticated {
-			http.Error(w,"Not authenticated", http.StatusNotAcceptable)
+			http.Error(w, "Not authenticated", http.StatusNotAcceptable)
 			return
 		}
 		content := getContentForUser(rsp.Username)
