@@ -15,8 +15,9 @@ spec:
         app: authentication
     spec:
       containers:
-      - name: gateway
-        image: docker.io/tennander/spexflix-authentication
+      - name: auth
+        image: tennander/spexflix-authentication
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
           name: web

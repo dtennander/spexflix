@@ -16,7 +16,8 @@ spec:
     spec:
       containers:
       - name: content
-        image: docker.io/tennander/spexflix-content
+        image: tennander/spexflix-content
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
           name: rest

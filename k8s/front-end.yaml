@@ -16,7 +16,8 @@ spec:
     spec:
       containers:
       - name: gateway
-        image: docker.io/tennander/spexflix-gateway
+        image: tennander/spexflix-gateway
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
           name: web
