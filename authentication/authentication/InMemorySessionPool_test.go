@@ -4,20 +4,17 @@ import (
 	"testing"
 )
 
-var sessionPool = SessionPoolImpl{}
+var sessionPool = inMemorySessionPool{}
 
 const username2 = "asd"
 
 func TestSessionPool_CreateSession(t *testing.T) {
 	// When
-	s, err := sessionPool.CreateSession(username2)
+	token, err := sessionPool.CreateSession(username2)
 	if err != nil {
 		t.Error("Could not create session.")
 	}
-	switch {
-	case !s.IsActive():
-		t.Fail()
-	case s.Username != username2:
+	if len(token) < 10 {
 		t.Fail()
 	}
 }
@@ -27,7 +24,7 @@ func TestSessionPoolImpl_GetUsername(t *testing.T) {
 	if err != nil {
 		t.Error("Could not create session.")
 	}
-	name, err := sessionPool.GetUsername(token.SessionId)
+	name, err := sessionPool.GetUsername(token)
 	switch {
 	case err != nil:
 		t.Error("Could not get Username")
@@ -60,7 +57,7 @@ func TestSessionPool_IsSessionIdValid(t *testing.T) {
 	if err != nil {
 		t.Error("Could not create session.")
 	}
-	if !sessionPool.IsSessionIdValid(s.SessionId) {
+	if !sessionPool.IsSessionIdValid(s) {
 		t.Fail()
 	}
 }

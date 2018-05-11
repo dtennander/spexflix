@@ -12,41 +12,39 @@ import (
 	"os"
 )
 
+type Authenticator interface {
+	Login(username string, password string) (token string, err error)
+	AuthenticateSession(token string) (username *string)
+}
+
 type auServer struct {
-	authenticator au.Authenticator
-	sessions      au.SessionPool
+	authenticator Authenticator
 	log           *log.Logger
 }
 
-func createAuService(authenticator au.Authenticator, sessionPool au.SessionPool, log *log.Logger) *auServer {
-	return &auServer{authenticator: authenticator, sessions: sessionPool, log: log}
+func createAuService(authenticator Authenticator, log *log.Logger) *auServer {
+	return &auServer{authenticator: authenticator, log: log}
 }
 
 func (s *auServer) Login(ctx context.Context, req *api.LoginRequest) (*api.LoginReply, error) {
 	s.log.Printf("Got LoginRequest: %+v", req)
-	username := req.Username
-	password := req.Password
-	success := s.authenticator.Authenticate(username, password)
-	rsp := &api.LoginReply{IsAuthenticated: success}
-	if success {
-		session, err := s.sessions.CreateSession(username)
-		if err != nil {
-			return nil, err
-		}
-		rsp.SessionToken = session.GetSessionId()
+	token, err := s.authenticator.Login(req.Username, req.Password)
+	if err != nil {
+		return &api.LoginReply{IsAuthenticated: false, SessionToken: ""}, nil
+	} else {
+		return &api.LoginReply{IsAuthenticated: true, SessionToken: token}, nil
 	}
-	return rsp, nil
 }
 
 func (s *auServer) Authenticate(ctx context.Context, req *api.AuRequest) (*api.AuReply, error) {
 	s.log.Printf("Got AuRequest: %+v", req)
 	token := req.SessionToken
-	isValid := s.sessions.IsSessionIdValid(token)
-	username, err := s.sessions.GetUsername(token)
-	if err != nil || !isValid {
-		username = ""
+	username := s.authenticator.AuthenticateSession(token)
+	if username != nil {
+		return &api.AuReply{IsAuthenticated: true, Username: *username}, nil
+	} else {
+		return &api.AuReply{IsAuthenticated: false, Username: ""}, nil
 	}
-	return &api.AuReply{IsAuthenticated: isValid, Username: username}, nil
 }
 
 func main() {
@@ -54,13 +52,13 @@ func main() {
 	flag.Parse()
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
-		log.Fatal("Failed to listen: %v", err)
+		log.Fatal("failed to listen: " + err.Error())
 	}
 	grpcServer := grpc.NewServer()
-	authenticator := &au.AuthenticatorImpl{}
-	sp := au.SessionPoolImpl{}
+	authenticator := au.CreateAuthenticator(au.CreateInMemorySessionPool(), nil)
 	logger := log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
-	auService := createAuService(authenticator, sp, logger)
+	auService := createAuService(authenticator, logger)
 	api.RegisterAuthenticationServer(grpcServer, auService)
 	grpcServer.Serve(lis)
+	logger.Print("Starting server!")
 }

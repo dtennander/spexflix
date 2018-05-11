@@ -49,7 +49,6 @@ func getApiHandler(auClient api.AuthenticationClient) func(w http.ResponseWriter
 		encoder.SetEscapeHTML(true)
 		encoder.Encode(content)
 	}
-
 }
 
 func main() {
