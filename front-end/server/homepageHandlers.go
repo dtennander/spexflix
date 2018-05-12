@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"html/template"
 	"io/ioutil"
-	"net/http"
 	"log"
+	"net/http"
 )
 
 type content struct {
@@ -36,14 +36,14 @@ func getHomePage(htmlPath string, contentServerAdress string) (func(w http.Respo
 		log.Print("Getting: " + targetUri)
 		js, err := http.Get(targetUri)
 		if err != nil {
-			http.Error(w, "Could not find content server. Error: " + err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Could not find content server. Error: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 		defer js.Body.Close()
 		c := &content{}
 		err = json.NewDecoder(js.Body).Decode(c)
 		if err != nil {
-			http.Error(w, "Could not decode json. Error: " + err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Could not decode json. Error: "+err.Error(), http.StatusInternalServerError)
 		}
 		temp.Execute(w, c)
 	}, nil

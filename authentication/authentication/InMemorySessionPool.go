@@ -6,7 +6,7 @@ type inMemorySessionPool map[string]*session
 
 var _ SessionPool = &inMemorySessionPool{}
 
-func CreateInMemorySessionPool() inMemorySessionPool {
+func NewInMemorySessionPool() inMemorySessionPool {
 	return make(inMemorySessionPool)
 }
 

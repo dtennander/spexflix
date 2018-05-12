@@ -11,7 +11,7 @@ type authenticator struct {
 }
 
 func CreateAuthenticator(pool SessionPool, database Database) *authenticator {
-	return &authenticator{hashes: make(map[string]string), sessions:pool, db:database}
+	return &authenticator{hashes: make(map[string]string), sessions: pool, db: database}
 }
 
 type SessionPool interface {
@@ -20,7 +20,7 @@ type SessionPool interface {
 	CreateSession(username string) (string, error)
 }
 
-type Database interface {}
+type Database interface{}
 
 func (au *authenticator) authenticate(user string, password string) bool {
 	if user == "admin" && password == "kakakaka" {
