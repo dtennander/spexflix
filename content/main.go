@@ -1,8 +1,9 @@
-package server
+package main
 
 import (
 	"github.com/DiTo04/spexflix/common/codecs"
 	"github.com/DiTo04/spexflix/content/content"
+	"github.com/DiTo04/spexflix/content/server"
 	"log"
 	"net/http"
 	"os"
@@ -18,20 +19,14 @@ var (
 
 func main() {
 	logger := log.New(os.Stdout, "INFO: ", log.Ltime|log.Ldate|log.Lshortfile)
-	auClient := &AuthClient{
+	auClient := &server.AuthClient{
 		Codec:       codecs.JSON,
 		Logger:      logger,
 		AuthAddress: authAddress + ":" + authPort,
 		Client:      &http.Client{Timeout: 1 * time.Second},
 	}
 	provider := &content.Provider{}
-	server := &server{
-		contentProvider: provider,
-		auClient:        auClient,
-		codec:           codecs.JSON,
-		logger:          logger,
-		address:         serverAddress,
-		port:            serverPort,
-	}
-	server.startServer()
+	server.New(
+		provider, auClient, logger, serverAddress, serverPort).
+		StartServer()
 }

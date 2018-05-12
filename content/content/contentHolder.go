@@ -1,10 +1,26 @@
 package content
 
+import (
+	"io"
+	"bytes"
+)
+
 type Provider struct {
 }
 
 const contentMessage = "Välkommen till Spexflix!"
 
-func (c *Provider) GetContentForUser(user string) string {
-	return contentMessage
+type closableBuffer struct {
+	bytes.Buffer
+}
+
+func (*closableBuffer) Close() error {
+	// No need to close string buffer.
+	return nil
+}
+
+func (c *Provider) Get(user string) io.ReadCloser {
+	buffer := &closableBuffer{}
+	buffer.WriteString(contentMessage)
+	return buffer
 }
