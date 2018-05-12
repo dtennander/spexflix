@@ -18,11 +18,12 @@ spec:
       - name: auth
         image: tennander/spexflix-authentication
         imagePullPolicy: IfNotPresent
+        env:
+        - name: AUTHENTICATION_PORT
+          value: "8080"
         ports:
-        - containerPort: 8000
+        - containerPort: 8080
           name: web
-        - containerPort: 31117
-          name: grpc
 ---
 kind: Service
 apiVersion: v1
@@ -32,7 +33,7 @@ spec:
   selector:
     app: authentication
   ports:
-  - name: grpc
+  - name: web
     protocol: TCP
-    port: 31117
-    targetPort: grpc
+    port: 8080
+    targetPort: web
