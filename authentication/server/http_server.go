@@ -1,15 +1,22 @@
-package main
+package server
 
 import (
 	"github.com/DiTo04/spexflix/common/codecs"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"time"
+	"context"
 )
 
 type Authenticator interface {
 	Login(username string, password string) (token string, err error)
 	AuthenticateSession(token string) (username *string)
+}
+
+type user struct {
+	Username string `json:"username"`
+	Password string `json:"password,omitempty"`
 }
 
 type server struct {
@@ -18,17 +25,34 @@ type server struct {
 	codec   codecs.Codec
 	address string
 	port    string
+	httpServer *http.Server
 }
 
-type user struct {
-	Username string `json:"username"`
-	Password string `json:"password,omitempty"`
+func New(auth Authenticator, logger *log.Logger, codec codecs.Codec, address string, port string) *server {
+	return &server{
+		auth:auth,
+		logger:logger,
+		codec: codec,
+		address: address,
+		port: port,
+	}
 }
 
-func (s *server) startServer() {
+func (s *server) StartServer() {
 	s.logger.Print("Starting authentivation service on port: " + s.port)
 	router := s.createRouter()
-	http.ListenAndServe(s.address+":"+s.port, router)
+	s.httpServer = &http.Server{
+		Handler:router,
+		Addr: s.address+":"+s.port,
+	}
+	s.httpServer.ListenAndServe()
+}
+
+func (s *server) StopServer(timeout time.Duration)  {
+	ctx, _ := context.WithTimeout(context.TODO(), timeout)
+	if err := s.httpServer.Shutdown(ctx); err != nil {
+		panic(err)
+	}
 }
 
 func (s *server) createSessionHandler() func(http.ResponseWriter, *http.Request) {

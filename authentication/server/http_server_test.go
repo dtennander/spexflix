@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"bytes"
@@ -40,7 +40,7 @@ func (a authenticatorMock) AuthenticateSession(sessionToken string) (username *s
 	return nil
 }
 
-func setUp() *http.Client {
+func setUp() (*server, *http.Client) {
 	authenticatorMock := authenticatorMock{}
 	logger := log.New(os.Stdout, "INFO: ", 0)
 	s := &server{
@@ -50,14 +50,16 @@ func setUp() *http.Client {
 		port:    port,
 		address: address,
 	}
-	go s.startServer()
+	go s.StartServer()
 	time.Sleep(100 * time.Millisecond)
-	return &http.Client{Timeout: 1 * time.Second}
+	return s, &http.Client{Timeout: 1 * time.Second}
 }
 
 func TestSessionEndpointSuccess(t *testing.T) {
 	// Given
-	client := setUp()
+	server, client := setUp()
+	defer server.StopServer(1 * time.Second)
+
 	req, err := http.NewRequest("POST", ServerAddress+"/session/"+token, nil)
 	if err != nil {
 		t.Fatal("Could not create request: " + err.Error())
@@ -92,7 +94,9 @@ func toString(reader io.Reader) string {
 
 func TestSessionEndpointFailiure(t *testing.T) {
 	// Given
-	client := setUp()
+	server, client := setUp()
+	defer server.StopServer(1 * time.Second)
+
 	req, err := http.NewRequest("POST", ServerAddress+"/session/"+token+"1", nil)
 	if err != nil {
 		t.Fatal("Could not create request: " + err.Error())
@@ -109,7 +113,9 @@ func TestSessionEndpointFailiure(t *testing.T) {
 
 func TestLoginSuccess(t *testing.T) {
 	// Given
-	client := setUp()
+	server, client := setUp()
+	defer server.StopServer(1 * time.Second)
+
 	buffer := new(bytes.Buffer)
 	codecs.JSON.Encode(buffer, user{Username: testUser, Password: testPassword})
 	req, err := http.NewRequest("POST", ServerAddress+"/login", buffer)
@@ -128,7 +134,9 @@ func TestLoginSuccess(t *testing.T) {
 
 func TestLoginFailure(t *testing.T) {
 	// Given
-	client := setUp()
+	server, client := setUp()
+	defer server.StopServer(1 * time.Second)
+
 	buffer := new(bytes.Buffer)
 	wrongPassword := testPassword + "1"
 	codecs.JSON.Encode(buffer, user{Username: testUser, Password: wrongPassword})
