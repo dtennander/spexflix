@@ -1,6 +1,6 @@
 all: docker
 
-bin/server: server.go
+bin/server: main.go */*.go
 	GOOS=linux go build -a -o bin/server --ldflags '-extldflags "-static"' -tags netgo -installsuffix netgo .
 
 docker: bin/server Dockerfile

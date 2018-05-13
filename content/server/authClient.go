@@ -3,9 +3,9 @@ package server
 import (
 	"errors"
 	"github.com/DiTo04/spexflix/common/codecs"
+	"io"
 	"log"
 	"net/http"
-	"io"
 )
 
 type user struct {
@@ -24,7 +24,7 @@ type AuthClient struct {
 }
 
 func (c *AuthClient) Validate(token string) (string, error) {
-	rsp, err := c.Client.Post(c.AuthAddress+"/session/"+token, "", nil)
+	rsp, err := c.Client.Post("http://"+c.AuthAddress+"/session/"+token, "", nil)
 	if err != nil {
 		return "", err
 	}

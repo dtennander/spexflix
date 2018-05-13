@@ -11,10 +11,9 @@ import (
 )
 
 var (
-	authAddress   = os.Getenv("AUTHENTICATION_SERVER")
-	authPort      = os.Getenv("AUTHENTICATION_PORT")
-	serverAddress = os.Getenv("SERVER_ADDRESS")
-	serverPort    = os.Getenv("SERVER_PORT")
+	authAddress = os.Getenv("AUTHENTICATION_SERVER")
+	authPort    = os.Getenv("AUTHENTICATION_PORT")
+	serverPort  = os.Getenv("SERVER_PORT")
 )
 
 func main() {
@@ -27,6 +26,6 @@ func main() {
 	}
 	provider := &content.Provider{}
 	server.New(
-		provider, auClient, logger, codecs.JSON, serverAddress, serverPort).
+		provider, auClient, logger, codecs.JSON, "0.0.0.0", serverPort).
 		StartServer()
 }

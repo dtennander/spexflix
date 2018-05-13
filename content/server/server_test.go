@@ -1,25 +1,26 @@
 package server
 
 import (
-	"io"
 	"bytes"
-	"io/ioutil"
-	"log"
-	"os"
-	"testing"
-	"net/http"
-	"github.com/stretchr/testify/assert"
-	"time"
 	"errors"
 	"github.com/DiTo04/spexflix/common/codecs"
+	"github.com/stretchr/testify/assert"
+	"io"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"os"
+	"testing"
+	"time"
 )
+
 const testPort = "8282"
 const address = "0.0.0.0"
 const testContent = "testContent"
 
 func setUpServerTest() (*server, *auMockClient, *contentMockProvider, *http.Client) {
 	auMockClient := &auMockClient{}
-	contentMockProvider := &contentMockProvider{content:testContent}
+	contentMockProvider := &contentMockProvider{content: testContent}
 	server := New(
 		contentMockProvider,
 		auMockClient,
@@ -29,14 +30,14 @@ func setUpServerTest() (*server, *auMockClient, *contentMockProvider, *http.Clie
 		testPort)
 	go server.StartServer()
 	time.Sleep(100 * time.Millisecond)
-	httpClient := &http.Client{Timeout:1*time.Second}
+	httpClient := &http.Client{Timeout: 1 * time.Second}
 	return server, auMockClient, contentMockProvider, httpClient
 }
 
 type auMockClient struct {
 	lastToken string
-	username string
-	error error
+	username  string
+	error     error
 }
 
 func (c *auMockClient) Validate(token string) (username string, err error) {
@@ -46,7 +47,7 @@ func (c *auMockClient) Validate(token string) (username string, err error) {
 
 type contentMockProvider struct {
 	lastUser string
-	content string
+	content  string
 }
 
 func (p *contentMockProvider) Get(username string) (content io.ReadCloser) {
@@ -76,7 +77,7 @@ func TestGetContentWithValidUser(t *testing.T) {
 	buffer := &bytes.Buffer{}
 	buffer.ReadFrom(response.Body)
 	assert.Equal(t,
-		"{\"username\":\"" + testUsername + "\",\"content\":\"" + testContent + "\"}\n",
+		"{\"username\":\""+testUsername+"\",\"content\":\""+testContent+"\"}\n",
 		buffer.String())
 	assert.Equal(t, token, auClient.lastToken)
 	assert.Equal(t, testUsername, contentProvider.lastUser)
@@ -93,7 +94,7 @@ func TestGetContentWithInvalidUser(t *testing.T) {
 	auClient.username = ""
 	auClient.error = errors.New("invalid user")
 
-	req, err := http.NewRequest("GET", getURL(token + "error"), nil)
+	req, err := http.NewRequest("GET", getURL(token+"error"), nil)
 	if err != nil {
 		t.Fatal(err)
 	}

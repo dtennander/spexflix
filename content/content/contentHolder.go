@@ -1,8 +1,8 @@
 package content
 
 import (
-	"io"
 	"bytes"
+	"io"
 )
 
 type Provider struct {
