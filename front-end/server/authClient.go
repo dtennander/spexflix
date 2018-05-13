@@ -1,15 +1,18 @@
 package server
 
 import (
+	"bytes"
 	"errors"
 	"github.com/DiTo04/spexflix/common/codecs"
+	"io"
 	"log"
 	"net/http"
-	"io"
+	"strings"
 )
 
 type user struct {
 	Username string `json:"username"`
+	Password string `json:"password,omitempty"`
 }
 
 type Poster interface {
@@ -23,18 +26,18 @@ type AuthClient struct {
 	Codec       codecs.Codec
 }
 
-func (c *AuthClient) Validate(token string) (string, error) {
-	rsp, err := c.Client.Post(c.AuthAddress+"/session/"+token, "", nil)
+func (c *AuthClient) Login(username string, password string) (token string, err error) {
+	buff := &bytes.Buffer{}
+	c.Codec.Encode(buff, &user{Username: username, Password: password})
+	rsp, err := c.Client.Post(c.AuthAddress+"/login", "application/json", buff)
 	if err != nil {
 		return "", err
 	}
 	if rsp.StatusCode != http.StatusOK {
-		return "", errors.New("could not validate user")
+		return "", errors.New("wrong username or password")
 	}
-	user := &user{}
-	err = c.Codec.Decode(rsp.Body, user)
-	if err != nil {
-		return "", err
-	}
-	return user.Username, nil
+	respBuffer := &bytes.Buffer{}
+	respBuffer.ReadFrom(rsp.Body)
+	token = strings.Trim(respBuffer.String(), "\n")
+	return token, nil
 }

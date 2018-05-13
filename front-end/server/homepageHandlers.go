@@ -1,19 +1,17 @@
-package main
+package server
 
 import (
-	"encoding/json"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
 )
 
-type content struct {
-	Username string `json:"username"`
-	Content  string `json:"content"`
+type ContentGetter interface {
+	Get(token string) (content interface{}, err error)
 }
 
-func getHomePage(htmlPath string, contentServerAdress string) (func(w http.ResponseWriter, r *http.Request), error) {
+func getHomePage(htmlPath string, contentGetter ContentGetter) (func(w http.ResponseWriter, r *http.Request), error) {
 	data, err := ioutil.ReadFile(htmlPath)
 	if err != nil {
 		log.Print("Could not read file: " + htmlPath)
@@ -32,18 +30,9 @@ func getHomePage(htmlPath string, contentServerAdress string) (func(w http.Respo
 			return
 		}
 		log.Print("Found cookie:" + cookie.Value)
-		targetUri := "http://" + contentServerAdress + "/content/" + cookie.Value
-		log.Print("Getting: " + targetUri)
-		js, err := http.Get(targetUri)
+		c, err := contentGetter.Get(cookie.Value)
 		if err != nil {
-			http.Error(w, "Could not find content server. Error: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-		defer js.Body.Close()
-		c := &content{}
-		err = json.NewDecoder(js.Body).Decode(c)
-		if err != nil {
-			http.Error(w, "Could not decode json. Error: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Could not create webpage.", http.StatusInternalServerError)
 		}
 		temp.Execute(w, c)
 	}, nil

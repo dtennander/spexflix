@@ -1,20 +1,21 @@
 package server
 
 import (
-	"testing"
+	"bytes"
 	"github.com/DiTo04/spexflix/common/codecs"
 	"github.com/DiTo04/spexflix/common/mocks"
-	"net/http"
-	"log"
-	"os"
-	"bytes"
 	"github.com/stretchr/testify/assert"
+	"log"
+	"net/http"
+	"os"
+	"testing"
 )
 
 const (
 	testUsername = "testUser"
-	testAddress = "1.1.1.1:11111111"
-	token = "19y6195ii515i1g51i5"
+	testPassword = "testPassword"
+	testAddress  = "1.1.1.1:11111111"
+	token        = "19y6195ii515i1g51i5"
 )
 
 var poster *mocks.MockHttpClient
@@ -26,9 +27,9 @@ func setUp(authResponse *http.Response, authError error) *AuthClient {
 	}
 	logger := log.New(os.Stdout, "INFO: ", log.Ltime|log.Ldate|log.Lshortfile)
 	return &AuthClient{
-		Client:poster,
-		Logger:logger,
-		Codec:codecs.JSON,
+		Client:      poster,
+		Logger:      logger,
+		Codec:       codecs.JSON,
 		AuthAddress: testAddress,
 	}
 }
@@ -39,19 +40,20 @@ func TestValidateSuccessful(t *testing.T) {
 	target := setUp(resp, nil)
 
 	// When
-	username, err := target.Validate(token)
+	token2, err := target.Login(testUsername, testPassword)
 
 	// Then
 	assert.Equal(t, nil, err)
-	assert.Equal(t, testUsername, username)
-	assert.Equal(t, testAddress + "/session/" + token, poster.LastUrl)
-	assert.Equal(t, nil, poster.LastBody)
+	assert.Equal(t, token, token2)
+	assert.Equal(t, testAddress+"/login", poster.LastUrl)
+	buff := &bytes.Buffer{}
+	buff.ReadFrom(poster.LastBody)
+	assert.Equal(t, "{\"username\":\""+testUsername+"\",\"password\":\""+testPassword+"\"}\n", buff.String())
 }
 
 func getValidResponse() *http.Response {
-	user := &user{Username: testUsername}
 	buffer := &bytes.Buffer{}
-	codecs.JSON.Encode(buffer, user)
+	buffer.WriteString(token + "\n")
 	resp := &http.Response{
 		StatusCode: http.StatusOK,
 		Body:       mocks.NopCloser{Reader: buffer},
@@ -65,16 +67,15 @@ func TestValidateUnAuthenticated(t *testing.T) {
 	target := setUp(rsp, nil)
 
 	// When
-	username, err := target.Validate(token)
+	token, err := target.Login(testUsername, testPassword+"1")
 
 	// Then
-	assert.Equal(t, "", username)
+	assert.Equal(t, "", token)
 	assert.NotNil(t, err)
-	assert.Equal(t, "could not validate user", err.Error())
+	assert.Equal(t, "wrong username or password", err.Error())
 }
 func getInvalidResponse() *http.Response {
 	return &http.Response{
 		StatusCode: http.StatusForbidden,
 	}
 }
-

@@ -1,8 +1,6 @@
-package main
+package server
 
 import (
-	"github.com/DiTo04/spexflix/authentication/api"
-	"golang.org/x/net/context"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -23,7 +21,11 @@ func createLoginGetHandler(logger *log.Logger) func(http.ResponseWriter, *http.R
 	}
 }
 
-func createLoginPostHandler(client api.AuthenticationClient, logger *log.Logger) func(w http.ResponseWriter, r *http.Request) {
+type Loginer interface {
+	Login(username string, password string) (token string, err error)
+}
+
+func createLoginPostHandler(auClient Loginer, logger *log.Logger) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()
 		if err != nil {
@@ -32,28 +34,19 @@ func createLoginPostHandler(client api.AuthenticationClient, logger *log.Logger)
 		}
 		username := r.Form.Get("name")
 		password := r.Form.Get("password")
-		req := &api.LoginRequest{Username: username, Password: password}
-		ctx := context.Background()
-		rsp, err := client.Login(ctx, req)
-		switch {
-		case err != nil:
+		token, err := auClient.Login(username, password)
+		if err != nil {
 			logger.Print(err.Error())
 			http.Error(w, "Could not authenticate", http.StatusInternalServerError)
-			break
-		case !rsp.IsAuthenticated:
-			http.Error(w, "Invalid credentials", http.StatusNotAcceptable)
-			break
-		default:
-			logger.Print(rsp.SessionToken)
-			cookie := &http.Cookie{
-				Name:     "SessionToken",
-				Path:     "/",
-				Secure:   false,
-				HttpOnly: false,
-				Value:    rsp.SessionToken,
-			}
-			http.SetCookie(w, cookie)
-			http.Redirect(w, r, "/browse", http.StatusFound)
 		}
+		cookie := &http.Cookie{
+			Name:     "SessionToken",
+			Path:     "/",
+			Secure:   false,
+			HttpOnly: false,
+			Value:    token,
+		}
+		http.SetCookie(w, cookie)
+		http.Redirect(w, r, "/browse", http.StatusFound)
 	}
 }

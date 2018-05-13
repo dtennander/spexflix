@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/DiTo04/spexflix/authentication/api"
-	"github.com/gorilla/mux"
-	"google.golang.org/grpc"
+	"github.com/DiTo04/spexflix/common/codecs"
+	"github.com/DiTo04/spexflix/front-end/content_client"
+	server2 "github.com/DiTo04/spexflix/front-end/server"
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 var (
@@ -14,6 +15,7 @@ var (
 	auPort      = os.Getenv("AUTHENTICATION_PORT")
 	contentAddr = os.Getenv("CONTENT_SERVER")
 	contentPort = os.Getenv("CONTENT_PORT")
+	port        = os.Getenv("PORT")
 )
 
 //This server is the gateway onto Spexflix.
@@ -26,20 +28,16 @@ func main() {
 	logger.Print("Authentication at: " + addrAndPort)
 	contentAddrAndPort := contentAddr + ":" + contentPort
 	logger.Print("Content server at: " + contentAddrAndPort)
-	var opt []grpc.DialOption
-	opt = append(opt, grpc.WithInsecure())
-	auConnection, err := grpc.Dial(addrAndPort, opt...)
-	if err != nil {
-		log.Fatal("Could not dial up au service,", err)
+	auClient := &server2.AuthClient{
+		Logger:      logger,
+		Codec:       codecs.JSON,
+		Client:      &http.Client{Timeout: 1 * time.Second},
+		AuthAddress: serverAddr + ":" + auPort,
 	}
-	auClient := api.NewAuthenticationClient(auConnection)
-	r := mux.NewRouter()
-	r.NewRoute().Path("/login").Methods("GET").HandlerFunc(createLoginGetHandler(logger))
-	r.NewRoute().Path("/login").Methods("POST").HandlerFunc(createLoginPostHandler(auClient, logger))
-	homepageHandler, err := getHomePage("/html-templates/homepage.tmpl", contentAddrAndPort)
-	if err != nil {
-		log.Fatal("Could not parse homepage")
+	contentClient := &content_client.Client{
+		Codec:                codecs.JSON,
+		ContentServerAddress: contentAddr + ":" + contentPort,
 	}
-	r.NewRoute().Path("/").Methods("GET").HandlerFunc(homepageHandler)
-	http.ListenAndServe("0.0.0.0:8000", r)
+	server := server2.New("0.0.0.0", port, logger, auClient, contentClient)
+	server.StartServer()
 }

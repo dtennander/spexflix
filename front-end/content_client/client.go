@@ -1,9 +1,9 @@
 package content_client
 
 import (
-	"net/http"
 	"github.com/DiTo04/spexflix/common/codecs"
 	"github.com/pkg/errors"
+	"net/http"
 )
 
 type contentView struct {
@@ -12,21 +12,19 @@ type contentView struct {
 }
 
 type Client struct {
-	contentServerAddress string
-	codec codecs.Codec
+	ContentServerAddress string
+	Codec                codecs.Codec
 }
 
 func (c *Client) Get(token string) (content interface{}, err error) {
-	targetUri := c.contentServerAddress + "/" + token + "/content"
+	targetUri := c.ContentServerAddress + "/" + token + "/content"
 	rsp, err := http.Get(targetUri)
 	if err != nil {
 		return nil, err
-	} else if (rsp.StatusCode != http.StatusOK) {
+	} else if rsp.StatusCode != http.StatusOK {
 		return nil, errors.New("Could not access content server.")
 	}
 	content = &contentView{}
-	c.codec.Decode(rsp.Body, content)
+	c.Codec.Decode(rsp.Body, content)
 	return content, nil
 }
-
-
