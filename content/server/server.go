@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"github.com/gorilla/mux"
 	"time"
+	"github.com/DiTo04/spexflix/common/codecs"
 )
 
 type TokenValidator interface {
@@ -17,45 +18,58 @@ type TokenValidator interface {
 type ContentProvider interface {
 	Get(username string) (content io.ReadCloser)
 }
+
+type shutdownLambda func(ctx context.Context) error
+
 type server struct {
 	contentProvider ContentProvider
 	auClient        TokenValidator
 	logger          *log.Logger
 	address         string
 	port            string
-	httpServer		*http.Server
+	codec			codecs.Codec
+	// internal
+	shutdownHook shutdownLambda
 }
 
 func New(
 	contentProvider ContentProvider,
 	auClient TokenValidator,
 	logger *log.Logger,
+	codec codecs.Codec,
 	serverAddress string,
 	serverPort string) *server {
-	return &server{
-		contentProvider:contentProvider,
-		auClient:auClient,
-		logger:logger,
-		address:serverAddress,
-		port:serverPort,
+		return &server{
+			contentProvider:contentProvider,
+			auClient:auClient,
+			logger:logger,
+			address:serverAddress,
+			port:serverPort,
+			codec:codec,
 	}
 }
 
 func (server *server) StartServer() {
 	server.logger.Print("Starting authentivation service on adress: ", server.address + ":" + server.port)
 	router := server.createRoutes()
-	server.httpServer = &http.Server{
+	httpServer := &http.Server{
 		Addr:server.address+":"+server.port,
 		Handler:router,
 	}
-	server.httpServer.ListenAndServe()
+	server.shutdownHook = httpServer.Shutdown
+	httpServer.ListenAndServe()
 }
 
 func (server *server) StopServer(timeout time.Duration)  {
 	ctx, _ := context.WithTimeout(context.TODO(), timeout)
-	if err := server.httpServer.Shutdown(ctx); err != nil {
+	if err := server.shutdownHook(ctx); err != nil {
 		panic(err)
 	}
+}
+
+type Content struct {
+	Username string `json:"username"`
+	Content  string `json:"content"`
 }
 
 func (server *server) getApiHandler() func(w http.ResponseWriter, r *http.Request) {
@@ -67,8 +81,8 @@ func (server *server) getApiHandler() func(w http.ResponseWriter, r *http.Reques
 		defer c.Close()
 		buff := &bytes.Buffer{}
 		buff.ReadFrom(c)
-		w.WriteHeader(http.StatusOK)
-		w.Write(buff.Bytes())
+		content := &Content{Content:buff.String(), Username:username}
+		server.codec.Encode(w, content)
 	}
 }
 

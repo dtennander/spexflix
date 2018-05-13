@@ -11,21 +11,22 @@ import (
 	"github.com/stretchr/testify/assert"
 	"time"
 	"errors"
+	"github.com/DiTo04/spexflix/common/codecs"
 )
-const testPort = "8080"
+const testPort = "8282"
 const address = "0.0.0.0"
 const testContent = "testContent"
 
 func setUpServerTest() (*server, *auMockClient, *contentMockProvider, *http.Client) {
 	auMockClient := &auMockClient{}
 	contentMockProvider := &contentMockProvider{content:testContent}
-	server := &server{
-		logger:log.New(os.Stdout, "TEST: ", 0),
-		auClient:auMockClient,
-		address:address,
-		port:testPort,
-		contentProvider:contentMockProvider,
-	}
+	server := New(
+		contentMockProvider,
+		auMockClient,
+		log.New(os.Stdout, "TEST: ", 0),
+		codecs.JSON,
+		address,
+		testPort)
 	go server.StartServer()
 	time.Sleep(100 * time.Millisecond)
 	httpClient := &http.Client{Timeout:1*time.Second}
@@ -74,7 +75,9 @@ func TestGetContentWithValidUser(t *testing.T) {
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 	buffer := &bytes.Buffer{}
 	buffer.ReadFrom(response.Body)
-	assert.Equal(t, testContent, buffer.String())
+	assert.Equal(t,
+		"{\"username\":\"" + testUsername + "\",\"content\":\"" + testContent + "\"}\n",
+		buffer.String())
 	assert.Equal(t, token, auClient.lastToken)
 	assert.Equal(t, testUsername, contentProvider.lastUser)
 }

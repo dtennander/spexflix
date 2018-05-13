@@ -27,6 +27,6 @@ func main() {
 	}
 	provider := &content.Provider{}
 	server.New(
-		provider, auClient, logger, serverAddress, serverPort).
+		provider, auClient, logger, codecs.JSON, serverAddress, serverPort).
 		StartServer()
 }
