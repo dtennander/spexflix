@@ -1,12 +1,12 @@
 package server
 
 import (
+	"context"
 	"github.com/DiTo04/spexflix/common/codecs"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"time"
-	"context"
 )
 
 type Authenticator interface {
@@ -20,21 +20,21 @@ type user struct {
 }
 
 type server struct {
-	auth    Authenticator
-	logger  *log.Logger
-	codec   codecs.Codec
-	address string
-	port    string
+	auth       Authenticator
+	logger     *log.Logger
+	codec      codecs.Codec
+	address    string
+	port       string
 	httpServer *http.Server
 }
 
 func New(auth Authenticator, logger *log.Logger, codec codecs.Codec, address string, port string) *server {
 	return &server{
-		auth:auth,
-		logger:logger,
-		codec: codec,
+		auth:    auth,
+		logger:  logger,
+		codec:   codec,
 		address: address,
-		port: port,
+		port:    port,
 	}
 }
 
@@ -42,13 +42,13 @@ func (s *server) StartServer() {
 	s.logger.Print("Starting authentivation service on port: " + s.port)
 	router := s.createRouter()
 	s.httpServer = &http.Server{
-		Handler:router,
-		Addr: s.address+":"+s.port,
+		Handler: router,
+		Addr:    s.address + ":" + s.port,
 	}
 	s.httpServer.ListenAndServe()
 }
 
-func (s *server) StopServer(timeout time.Duration)  {
+func (s *server) StopServer(timeout time.Duration) {
 	ctx, _ := context.WithTimeout(context.TODO(), timeout)
 	if err := s.httpServer.Shutdown(ctx); err != nil {
 		panic(err)

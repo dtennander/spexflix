@@ -1,4 +1,4 @@
-package authentication
+package main
 
 import (
 	"github.com/DiTo04/spexflix/authentication/authentication"
@@ -18,9 +18,8 @@ func main() {
 	}
 	logger := log.New(os.Stdout, "INFO: ", log.Ltime|log.Ldate|log.Lshortfile)
 	auth := newAuthenticator()
-	server := server.New(auth, logger, codecs.JSON, "0.0.0.0", auPort)
-
-	server.StartServer()
+	s := server.New(auth, logger, codecs.JSON, "0.0.0.0", auPort)
+	s.StartServer()
 }
 
 func newAuthenticator() server.Authenticator {
