@@ -32,11 +32,12 @@ func main() {
 		Logger:      logger,
 		Codec:       codecs.JSON,
 		Client:      &http.Client{Timeout: 1 * time.Second},
-		AuthAddress: serverAddr + ":" + auPort,
+		AuthAddress: "http://" + serverAddr + ":" + auPort,
 	}
 	contentClient := &content_client.Client{
 		Codec:                codecs.JSON,
 		ContentServerAddress: contentAddr + ":" + contentPort,
+		Logger:               logger,
 	}
 	server := server2.New("0.0.0.0", port, logger, auClient, contentClient)
 	server.StartServer()

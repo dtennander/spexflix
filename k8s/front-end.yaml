@@ -19,17 +19,19 @@ spec:
         image: tennander/spexflix-gateway
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 8000
+        - containerPort: 8080
           name: web
         env:
         - name: AUTHENTICATION_SERVER
           value: "authentication"
         - name: AUTHENTICATION_PORT
-          value: "31117"
+          value: "8080"
         - name: CONTENT_SERVER
           value: "content"
         - name: CONTENT_PORT
-          value: "8000"
+          value: "8080"
+        - name: PORT
+          value: "8080"
 ---
 kind: Service
 apiVersion: v1

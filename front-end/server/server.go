@@ -38,7 +38,7 @@ func (server *server) GetRouter() http.Handler {
 		Path("/login").
 		Methods("POST").
 		HandlerFunc(createLoginPostHandler(server.auClient, server.logger))
-	homepageHandler, err := getHomePage("/html-templates/homepage.tmpl", server.contentClient)
+	homepageHandler, err := server.getHomePage("/html-templates/homepage.tmpl")
 	if err != nil {
 		log.Fatal("Could not parse homepage")
 	}

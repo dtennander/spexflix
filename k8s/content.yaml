@@ -19,13 +19,15 @@ spec:
         image: tennander/spexflix-content
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 8000
+        - containerPort: 8080
           name: rest
         env:
         - name: AUTHENTICATION_SERVER
           value: "authentication"
         - name: AUTHENTICATION_PORT
-          value: "31117"
+          value: "8080"
+        - name: SERVER_PORT
+          value: "8080"
 ---
 kind: Service
 apiVersion: v1
@@ -37,5 +39,5 @@ spec:
   ports:
   - name: rest
     protocol: TCP
-    port: 8000
+    port: 8080
     targetPort: rest

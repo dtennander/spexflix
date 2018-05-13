@@ -11,7 +11,7 @@ type ContentGetter interface {
 	Get(token string) (content interface{}, err error)
 }
 
-func getHomePage(htmlPath string, contentGetter ContentGetter) (func(w http.ResponseWriter, r *http.Request), error) {
+func (server *server) getHomePage(htmlPath string) (func(w http.ResponseWriter, r *http.Request), error) {
 	data, err := ioutil.ReadFile(htmlPath)
 	if err != nil {
 		log.Print("Could not read file: " + htmlPath)
@@ -30,9 +30,11 @@ func getHomePage(htmlPath string, contentGetter ContentGetter) (func(w http.Resp
 			return
 		}
 		log.Print("Found cookie:" + cookie.Value)
-		c, err := contentGetter.Get(cookie.Value)
+		c, err := server.contentClient.Get(cookie.Value)
 		if err != nil {
+			server.logger.Print("error: " + err.Error())
 			http.Error(w, "Could not create webpage.", http.StatusInternalServerError)
+			return
 		}
 		temp.Execute(w, c)
 	}, nil
