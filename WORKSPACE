@@ -16,6 +16,24 @@ go_rules_dependencies()
 
 go_register_toolchains()
 
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 
 gazelle_dependencies()
+
+go_repository(
+    name = "com_github_gorilla_mux",
+    commit = "e3702bed27f0d39777b0b37b664b6280e8ef8fbf",
+    importpath = "github.com/gorilla/mux",
+)
+
+go_repository(
+    name = "com_github_stretchr_testify",
+    commit = "c679ae2cc0cb27ec3293fea7e254e47386f05d69",
+    importpath = "github.com/stretchr/testify",
+)
+
+go_repository(
+    name = "com_github_gorilla_context",
+    commit = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42",
+    importpath = "github.com/gorilla/context",
+)

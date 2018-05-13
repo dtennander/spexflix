@@ -3,9 +3,9 @@ package content_client
 import (
 	"bytes"
 	"github.com/DiTo04/spexflix/common/codecs"
-	"github.com/pkg/errors"
 	"log"
 	"net/http"
+	"errors"
 )
 
 type contentView struct {
