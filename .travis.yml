@@ -13,7 +13,6 @@ os:
 cache:
   directories:
     - "$HOME/google-cloud-sdk/"
-    - "$HOME/.cache/bazel"
 
 # Install services
 services:
@@ -61,7 +60,6 @@ before_deploy:
   - source /home/travis/google-cloud-sdk/path.bash.inc
   - gcloud --quiet version
   - gcloud --quiet components update
-  - gcloud --quiet components beta update
   - gcloud --quiet components update kubectl
   - echo $GCLOUD_KEY | base64 --decode -i > ${HOME}/gcloud-service-key.json
   - gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
