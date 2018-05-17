@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: content
-        image: tennander/spexflix-content
-        imagePullPolicy: IfNotPresent
+        image: gcr.io/spexflix/content:dev
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
           name: rest

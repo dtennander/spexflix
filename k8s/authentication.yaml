@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: auth
-        image: tennander/spexflix-authentication
-        imagePullPolicy: IfNotPresent
+        image: gcr.io/spexflix/authentication:dev
+        imagePullPolicy: Always
         env:
         - name: AUTHENTICATION_PORT
           value: "8080"

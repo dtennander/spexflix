@@ -10,6 +10,18 @@ http_archive(
     sha256 = "ddedc7aaeb61f2654d7d7d4fd7940052ea992ccdb031b8f9797ed143ac7e8d43",
 )
 
+git_repository(
+    name = "io_bazel_rules_docker",
+    commit = "27c94dec66c3c9fdb478c33994471c5bfc15b6eb",
+    remote = "https://github.com/bazelbuild/rules_docker.git",
+)
+
+git_repository(
+    name = "io_bazel_rules_k8s",
+    commit = "8c9b9cbc6a46a4c8db4a1da8565252b326d90331",
+    remote = "https://github.com/bazelbuild/rules_k8s.git",
+)
+
 load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")
 
 go_rules_dependencies()
@@ -36,4 +48,46 @@ go_repository(
     name = "com_github_gorilla_context",
     commit = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42",
     importpath = "github.com/gorilla/context",
+)
+
+load(
+    "@io_bazel_rules_docker//go:image.bzl",
+    _go_image_repos = "repositories",
+)
+
+_go_image_repos()
+
+load(
+    "@io_bazel_rules_docker//docker:docker.bzl",
+    "docker_repositories",
+)
+
+docker_repositories()
+
+load("@io_bazel_rules_k8s//k8s:k8s.bzl", "k8s_repositories", "k8s_defaults")
+
+k8s_repositories()
+
+k8s_defaults(
+  # This becomes the name of the @repository and the rule
+  # you will import in your BUILD files.
+  name = "k8s_dev_deploy",
+  namespace = "spexflix-dev",
+  cluster = "gke_spexflix_europe-west1-b_develop",
+)
+
+k8s_defaults(
+  # This becomes the name of the @repository and the rule
+  # you will import in your BUILD files.
+  name = "k8s_canary_deploy",
+  namespace = "spexflix-canary",
+  cluster = "gke_spexflix_europe-west1-b_develop",
+)
+
+k8s_defaults(
+  # This becomes the name of the @repository and the rule
+  # you will import in your BUILD files.
+  name = "k8s_production_deploy",
+  namespace = "spexflix-production",
+  cluster = "gke_spexflix_europe-west1-b_develop",
 )

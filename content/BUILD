@@ -1,19 +1,15 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@io_bazel_rules_docker//go:image.bzl", "go_image")
 
-go_library(
-    name = "go_default_library",
+go_image(
+    name = "image",
     srcs = ["main.go"],
+    goos = "linux",
+    pure = "on",
     importpath = "github.com/DiTo04/spexflix/content",
-    visibility = ["//visibility:private"],
+    visibility = ["//visibility:public"],
     deps = [
         "//common/codecs:go_default_library",
         "//content/content:go_default_library",
         "//content/server:go_default_library",
     ],
-)
-
-go_binary(
-    name = "content",
-    embed = [":go_default_library"],
-    visibility = ["//visibility:public"],
 )

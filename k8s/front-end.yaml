@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: gateway
-        image: tennander/spexflix-gateway
-        imagePullPolicy: IfNotPresent
+        image: gcr.io/spexflix/front-end:dev
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
           name: web
@@ -40,7 +40,7 @@ metadata:
 spec:
   selector:
     app: gateway
-  type: NodePort
+  type: LoadBalancer
   ports:
   - name: web
     protocol: TCP
