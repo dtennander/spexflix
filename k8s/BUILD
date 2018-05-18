@@ -30,27 +30,27 @@ k8s_objects(
 )
 
 k8s_dev_deploy(
-  name = "dev-auth",
-  template = "authentication.yaml",
-  images = {
-    "gcr.io/spexflix/authentication:dev" : "//authentication:image"
-  },
+    name = "dev-auth",
+    images = {
+        "gcr.io/spexflix/authentication:dev": "//authentication:image",
+    },
+    template = ":develop-authentication.yaml",
 )
 
 k8s_dev_deploy(
-  name = "dev-content",
-  template = "content.yaml",
-  images = {
-    "gcr.io/spexflix/content:dev": "//content:image"
-  },
+    name = "dev-content",
+    images = {
+        "gcr.io/spexflix/content:dev": "//content:image",
+    },
+    template = ":develop-content.yaml",
 )
 
 k8s_dev_deploy(
-  name = "dev-front-end",
-  template = "front-end.yaml",
-  images = {
-    "gcr.io/spexflix/front-end:dev": "//front-end:image"
-  },
+    name = "dev-front-end",
+    images = {
+        "gcr.io/spexflix/front-end:dev": "//front-end:image",
+    },
+    template = ":develop-front-end.yaml",
 )
 
 k8s_production_deploy(
@@ -107,9 +107,17 @@ k8s_production_deploy(
          outs = ["canary-" + yamlFile],
          cmd = "sed 's/replicas: 2/replicas: 1/g' $< | \
                 sed 's/env: production/env: canary/g' | \
-                perl -pe 's/(name:\W\w+)-production/\\1-canary/' > $@"
-)
-for yamlFile in glob(["*.yaml"])]
+                perl -pe 's/(name:\W\w+)-production/\\1-canary/' > $@",
+) for yamlFile in glob(["*.yaml"])]
+
+[genrule(
+    name = "developify-" + yamlFile,
+    srcs = [yamlFile],
+    outs = ["develop-" + yamlFile],
+    cmd = "sed 's/replicas: 2/replicas: 1/g' $< | \
+                sed 's/env: production/env: develop/g' | \
+                perl -pe 's/(name:\W\w+)-production/\\1-develop/' > $@",
+) for yamlFile in glob(["*.yaml"])]
 
 k8s_dev_deploy(
   name = "dev-ingress",

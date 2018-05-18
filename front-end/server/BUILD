@@ -13,6 +13,7 @@ go_library(
     deps = [
         "//common/codecs:go_default_library",
         "@com_github_gorilla_mux//:go_default_library",
+        "@com_github_urfave_negroni//:go_default_library",
     ],
 )
 

@@ -6,26 +6,36 @@ pkg_tar(
     name = "html_pages",
     srcs = glob(["html-templates/*"]),
     mode = "0644",
-    package_dir = "/html-templates"
+    package_dir = "/html-templates",
+)
+
+pkg_tar(
+    name = "public_files",
+    srcs = glob(["public/*"]),
+    mode = "0644",
+    package_dir = "/public",
 )
 
 container_image(
     name = "template_image",
     base = "@go_image_base//image",
-    tars = [":html_pages"],
+    tars = [
+        ":html_pages",
+        ":public_files",
+    ],
 )
 
 go_image(
     name = "image",
     srcs = ["main.go"],
+    base = "template_image",
     goos = "linux",
-    pure = "on",
     importpath = "github.com/DiTo04/spexflix/front-end",
+    pure = "on",
     visibility = ["//visibility:public"],
     deps = [
         "//common/codecs:go_default_library",
         "//front-end/content_client:go_default_library",
         "//front-end/server:go_default_library",
     ],
-    base = "template_image",
 )

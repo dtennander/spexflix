@@ -50,6 +50,12 @@ go_repository(
     importpath = "github.com/gorilla/context",
 )
 
+go_repository(
+    name = "com_github_urfave_negroni",
+    commit = "22c5532ea862c34fdad414e90f8cc00b4f6f4cab",
+    importpath = "github.com/urfave/negroni",
+)
+
 load(
     "@io_bazel_rules_docker//go:image.bzl",
     _go_image_repos = "repositories",

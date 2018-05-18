@@ -4,6 +4,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"github.com/urfave/negroni"
 )
 
 type server struct {
@@ -42,6 +43,9 @@ func (server *server) GetRouter() http.Handler {
 	if err != nil {
 		log.Fatal("Could not parse homepage")
 	}
-	r.NewRoute().Path("/").Methods("GET").HandlerFunc(homepageHandler)
-	return r
+	r.NewRoute().Path("/browse").Methods("GET").HandlerFunc(homepageHandler)
+	n := negroni.Classic()
+	n.Use(negroni.NewStatic(http.Dir("/public")))
+	n.UseHandler(r)
+	return n
 }
