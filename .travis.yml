@@ -20,8 +20,9 @@ addons:
 
 before_install:
   # Log into gcloud
-  - echo "${GCLOUD_KEY}" | base64 --decode -i > keyfile.json
+  - echo -n "${GCLOUD_KEY}" | base64 -d > keyfile.json
   - gcloud auth activate-service-account --key-file keyfile.json
+  - docker login -u _json_key -p "$(cat keyfile.json)" https://gcr.io
   - rm -f keyfile.json
   - gcloud config set core/project spexflix
   - gcloud config set compute/zone europe-west1-b
@@ -34,10 +35,10 @@ script:
   - kubectl version
 
   # Check that all of our tools and samples build
-  - bazel build //...
+  - bazel clean && bazel build //...
   # Check that all of our tests pass
   - bazel test //...
-    
+  
 deploy:
   - provider: script
     script: bazel run //k8s:canary.apply
