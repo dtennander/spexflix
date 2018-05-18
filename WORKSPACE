@@ -72,15 +72,7 @@ k8s_defaults(
   # This becomes the name of the @repository and the rule
   # you will import in your BUILD files.
   name = "k8s_dev_deploy",
-  namespace = "spexflix-dev",
-  cluster = "gke_spexflix_europe-west1-b_develop",
-)
-
-k8s_defaults(
-  # This becomes the name of the @repository and the rule
-  # you will import in your BUILD files.
-  name = "k8s_canary_deploy",
-  namespace = "spexflix-canary",
+  namespace = "spexflix-develop",
   cluster = "gke_spexflix_europe-west1-b_develop",
 )
 

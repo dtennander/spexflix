@@ -70,10 +70,12 @@ before_deploy:
 
 deploy:
   - provider: script
-    script: bazel run //k8s:dev.apply
+    script: bazel run //k8s:canary.apply
     skip_cleanup: true
     on:
       branch: master
-
-notifications:
-  email: false
+  - provider: script
+    script: bazel run //k8s:production.apply
+    skip_cleanup: true
+    on:
+      tags: true
