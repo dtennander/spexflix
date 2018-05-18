@@ -111,3 +111,13 @@ k8s_production_deploy(
 )
 for yamlFile in glob(["*.yaml"])]
 
+k8s_dev_deploy(
+  name = "dev-ingress",
+  template = "ingress.yaml",
+)
+
+k8s_production_deploy(
+  name = "production-ingress",
+  template = "ingress.yaml",
+)
+

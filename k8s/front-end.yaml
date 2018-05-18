@@ -41,9 +41,9 @@ metadata:
 spec:
   selector:
     app: gateway
-  type: LoadBalancer
+  type: NodePort
   ports:
   - name: web
     protocol: TCP
-    port: 80
+    port: 8080
     targetPort: web

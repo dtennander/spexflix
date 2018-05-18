@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: main-ingress
+spec:
+  tls:
+    - secretName: tls-secret
+  rules:
+  - host:
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: front-end
+          servicePort: web
+      - path: /test
+        backend:
+          serviceName: front-end
+          servicePort: web
