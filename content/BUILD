@@ -4,8 +4,8 @@ go_image(
     name = "image",
     srcs = ["main.go"],
     goos = "linux",
-    pure = "on",
     importpath = "github.com/DiTo04/spexflix/content",
+    pure = "on",
     visibility = ["//visibility:public"],
     deps = [
         "//common/codecs:go_default_library",

@@ -2,9 +2,9 @@ package server
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/urfave/negroni"
 	"log"
 	"net/http"
-	"github.com/urfave/negroni"
 )
 
 type server struct {

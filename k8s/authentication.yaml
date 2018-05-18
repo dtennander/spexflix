@@ -9,6 +9,7 @@ spec:
   selector:
     matchLabels:
       app: authentication
+      env: production
   template:
     metadata:
       labels:

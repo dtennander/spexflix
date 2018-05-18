@@ -75,17 +75,17 @@ load("@io_bazel_rules_k8s//k8s:k8s.bzl", "k8s_repositories", "k8s_defaults")
 k8s_repositories()
 
 k8s_defaults(
-  # This becomes the name of the @repository and the rule
-  # you will import in your BUILD files.
-  name = "k8s_dev_deploy",
-  namespace = "spexflix-develop",
-  cluster = "gke_spexflix_europe-west1-b_develop",
+    # This becomes the name of the @repository and the rule
+    # you will import in your BUILD files.
+    name = "k8s_dev_deploy",
+    namespace = "spexflix-develop",
+    cluster = "gke_spexflix_europe-west1-b_develop",
 )
 
 k8s_defaults(
-  # This becomes the name of the @repository and the rule
-  # you will import in your BUILD files.
-  name = "k8s_production_deploy",
-  namespace = "spexflix-production",
-  cluster = "gke_spexflix_europe-west1-b_develop",
+    # This becomes the name of the @repository and the rule
+    # you will import in your BUILD files.
+    name = "k8s_production_deploy",
+    namespace = "spexflix-production",
+    cluster = "gke_spexflix_europe-west1-b_develop",
 )

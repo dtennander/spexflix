@@ -5,8 +5,8 @@ go_image(
     name = "image",
     srcs = ["main.go"],
     goos = "linux",
-    pure = "on",
     importpath = "github.com/DiTo04/spexflix/authentication",
+    pure = "on",
     visibility = ["//visibility:public"],
     deps = [
         "//authentication/authentication:go_default_library",

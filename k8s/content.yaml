@@ -9,6 +9,7 @@ spec:
   selector:
     matchLabels:
       app: content
+      env: production
   template:
     metadata:
       labels:

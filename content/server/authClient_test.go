@@ -44,7 +44,7 @@ func TestValidateSuccessful(t *testing.T) {
 	// Then
 	assert.Equal(t, nil, err)
 	assert.Equal(t, testUsername, username)
-	assert.Equal(t, "http://" + testAddress+"/session/"+token, poster.LastUrl)
+	assert.Equal(t, "http://"+testAddress+"/session/"+token, poster.LastUrl)
 	assert.Equal(t, nil, poster.LastBody)
 }
 
