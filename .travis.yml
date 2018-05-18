@@ -1,73 +1,43 @@
-# Use Dockerized infrastructure
 sudo: required
-
-# Use node_js environnement
-language: go
-go:
-  - "1.10"
-
+dist: trusty
+language:
+  - java
 os:
   - linux
+jdk:
+  - oraclejdk8  # Building Bazel requires JDK8.
+addons:
+  apt:
+    sources:
+      - sourceline: 'deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8'
+        key_url: 'https://storage.googleapis.com/bazel-apt/doc/apt-key.pub.gpg'
+      - sourceline: 'deb [arch=amd64] http://packages.cloud.google.com/apt cloud-sdk-trusty main'
+        key_url: 'https://packages.cloud.google.com/apt/doc/apt-key.gpg'
+    packages:
+      - bazel
+      - google-cloud-sdk
+      - kubectl
 
-# Cache Gcloud SDK between commands
-cache:
-  directories:
-    - "$HOME/google-cloud-sdk/"
-
-# Install services
-services:
-  - docker
-
-# Set env vars
-env:
-  global:
-    - GOOGLE_APPLICATION_CREDENTIALS=~/gcloud-service-key.json
-    - PROJECT_NAME=spexflix
-    - CLUSTER_NAME=develop
-    - CLOUDSDK_COMPUTE_ZONE=europe-west1-b
-    - BAZEL_VERSION=0.10.0
-    - OS=linux
-
-# Setup bazel
 before_install:
-  - |
-    URL="https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-installer-${OS}-x86_64.sh"
-    wget -O install.sh "${URL}"
-    chmod +x install.sh
-    ./install.sh --user
-    rm -f install.sh
-
-install:
-  - |
-    bazel \
-      --output_base=$HOME/.cache/bazel \
-      --batch \
-      build \
-      --config=ci \
-      //...
+  # Log into gcloud
+  - echo "${GCLOUD_KEY}" | base64 --decode -i > keyfile.json
+  - gcloud auth activate-service-account --key-file keyfile.json
+  - rm -f keyfile.json
+  - gcloud config set core/project spexflix
+  - gcloud config set compute/zone europe-west1-b
+  - gcloud container clusters get-credentials develop
 
 script:
-  - |
-    bazel \
-      --output_base=$HOME/.cache/bazel \
-      --batch \
-      test \
-      --config=ci \
-      //...
+  # Check our installs.
+  - bazel version
+  - gcloud version
+  - kubectl version
 
-before_deploy:
-  - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf $HOME/google-cloud-sdk; export CLOUDSDK_CORE_DISABLE_PROMPTS=1; curl https://sdk.cloud.google.com | bash; fi
-  - source /home/travis/google-cloud-sdk/path.bash.inc
-  - gcloud --quiet version
-  - gcloud --quiet components update
-  - gcloud --quiet components update kubectl
-  - echo $GCLOUD_KEY | base64 --decode -i > ${HOME}/gcloud-service-key.json
-  - gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
-  - gcloud --quiet config set project $PROJECT_NAME
-  - gcloud --quiet config set container/cluster $CLUSTER_NAME
-  - gcloud --quiet config set compute/zone ${CLOUDSDK_COMPUTE_ZONE}
-  - gcloud --quiet container clusters get-credentials $CLUSTER_NAME
-
+  # Check that all of our tools and samples build
+  - bazel build //...
+  # Check that all of our tests pass
+  - bazel test //...
+    
 deploy:
   - provider: script
     script: bazel run //k8s:canary.apply
