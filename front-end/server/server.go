@@ -29,8 +29,18 @@ func (server *server) StartServer() {
 	server.ListenAndServe()
 }
 
+func (server *server) healthz(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("ok"))
+	return
+}
+
 func (server *server) GetRouter() http.Handler {
 	r := mux.NewRouter()
+	r.NewRoute().
+		Path("/healthz").
+		Methods("GET").
+		HandlerFunc(server.healthz)
 	r.NewRoute().
 		Path("/login").
 		Methods("GET").

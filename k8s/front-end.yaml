@@ -23,6 +23,20 @@ spec:
         ports:
         - containerPort: 8080
           name: web
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: web
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+          periodSeconds: 15
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: web
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
+          periodSeconds: 15
         env:
         - name: AUTHENTICATION_SERVER
           value: "authentication"
