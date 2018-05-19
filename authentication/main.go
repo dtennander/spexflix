@@ -4,6 +4,7 @@ import (
 	"github.com/DiTo04/spexflix/authentication/authentication"
 	"github.com/DiTo04/spexflix/authentication/server"
 	"github.com/DiTo04/spexflix/common/codecs"
+	"github.com/urfave/negroni"
 	"log"
 	"os"
 )
@@ -18,7 +19,8 @@ func main() {
 	}
 	logger := log.New(os.Stdout, "INFO: ", log.Ltime|log.Ldate|log.Lshortfile)
 	auth := newAuthenticator()
-	s := server.New(auth, logger, codecs.JSON, "0.0.0.0", auPort)
+	middleware := negroni.Classic()
+	s := server.New(auth, logger, codecs.JSON, "0.0.0.0", auPort, middleware)
 	s.StartServer()
 }
 

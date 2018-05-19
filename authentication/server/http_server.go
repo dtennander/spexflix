@@ -14,6 +14,11 @@ type Authenticator interface {
 	AuthenticateSession(token string) (username *string)
 }
 
+type Middleware interface {
+	UseHandler(handler http.Handler)
+	http.Handler
+}
+
 type user struct {
 	Username string `json:"username"`
 	Password string `json:"password,omitempty"`
@@ -26,15 +31,17 @@ type server struct {
 	address    string
 	port       string
 	httpServer *http.Server
+	middleware Middleware
 }
 
-func New(auth Authenticator, logger *log.Logger, codec codecs.Codec, address string, port string) *server {
+func New(auth Authenticator, logger *log.Logger, codec codecs.Codec, address string, port string, middleware Middleware) *server {
 	return &server{
-		auth:    auth,
-		logger:  logger,
-		codec:   codec,
-		address: address,
-		port:    port,
+		auth:       auth,
+		logger:     logger,
+		codec:      codec,
+		address:    address,
+		port:       port,
+		middleware: middleware,
 	}
 }
 
@@ -55,38 +62,28 @@ func (s *server) StopServer(timeout time.Duration) {
 	}
 }
 
-func (s *server) createSessionHandler() func(http.ResponseWriter, *http.Request) {
-	logRouteSetup(s.logger, "/session/{token}")
-	return func(writer http.ResponseWriter, request *http.Request) {
-		sessionToken := mux.Vars(request)["token"]
-		s.logger.Print("Handeling session/" + sessionToken)
-		username := s.auth.AuthenticateSession(sessionToken)
-		if username == nil {
-			s.logger.Print("Could not authenticate!")
-			http.Error(writer, "Could not Authenticate!", http.StatusForbidden)
-			return
-		}
-		writer.WriteHeader(http.StatusOK)
-		s.codec.Encode(writer, &user{Username: *username})
+func (s *server) handlePostSession(writer http.ResponseWriter, request *http.Request) {
+	sessionToken := mux.Vars(request)["token"]
+	s.logger.Print("Handeling session/" + sessionToken)
+	username := s.auth.AuthenticateSession(sessionToken)
+	if username == nil {
+		s.logger.Print("Could not authenticate!")
+		http.Error(writer, "Could not Authenticate!", http.StatusForbidden)
+		return
 	}
+	writer.WriteHeader(http.StatusOK)
+	s.codec.Encode(writer, &user{Username: *username})
 }
 
-func (s *server) createLoginHandler() func(http.ResponseWriter, *http.Request) {
-	logRouteSetup(s.logger, "/login")
-	return func(writer http.ResponseWriter, request *http.Request) {
-		user := &user{}
-		s.codec.Decode(request.Body, user)
-		token, err := s.auth.Login(user.Username, user.Password)
-		if err != nil {
-			s.logger.Print("Wrong username and password!")
-			http.Error(writer, "Wrong username and password!", http.StatusForbidden)
-			return
-		}
-		writer.WriteHeader(http.StatusOK)
-		s.codec.Encode(writer, token)
+func (s *server) handlePostLogin(writer http.ResponseWriter, request *http.Request) {
+	user := &user{}
+	s.codec.Decode(request.Body, user)
+	token, err := s.auth.Login(user.Username, user.Password)
+	if err != nil {
+		s.logger.Print("Wrong username and password!")
+		http.Error(writer, "Wrong username and password!", http.StatusForbidden)
+		return
 	}
-}
-
-func logRouteSetup(logger *log.Logger, path string) {
-	logger.Print("Setting up " + path + "endpoint.")
+	writer.WriteHeader(http.StatusOK)
+	s.codec.Encode(writer, token)
 }

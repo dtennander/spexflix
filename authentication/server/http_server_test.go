@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"github.com/DiTo04/spexflix/common/codecs"
+	"github.com/urfave/negroni"
 	"io"
 	"log"
 	"net/http"
@@ -44,11 +45,12 @@ func setUp() (*server, *http.Client) {
 	authenticatorMock := authenticatorMock{}
 	logger := log.New(os.Stdout, "INFO: ", 0)
 	s := &server{
-		auth:    authenticatorMock,
-		codec:   codecs.JSON,
-		logger:  logger,
-		port:    port,
-		address: address,
+		auth:       authenticatorMock,
+		codec:      codecs.JSON,
+		logger:     logger,
+		port:       port,
+		address:    address,
+		middleware: negroni.Classic(),
 	}
 	go s.StartServer()
 	time.Sleep(100 * time.Millisecond)
