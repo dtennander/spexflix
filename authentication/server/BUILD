@@ -18,5 +18,8 @@ go_test(
     name = "go_default_test",
     srcs = ["http_server_test.go"],
     embed = [":go_default_library"],
-    deps = ["//common/codecs:go_default_library"],
+    deps = [
+        "//common/codecs:go_default_library",
+        "@com_github_urfave_negroni//:go_default_library",
+    ],
 )

@@ -12,5 +12,6 @@ go_image(
         "//authentication/authentication:go_default_library",
         "//authentication/server:go_default_library",
         "//common/codecs:go_default_library",
+        "@com_github_urfave_negroni//:go_default_library",
     ],
 )
