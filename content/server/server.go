@@ -86,18 +86,27 @@ func (server *server) getApiHandler() func(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (server *server) loggedIn(handler func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
-	server.logger.Print("Setting up Validation middleware")
-	return func(w http.ResponseWriter, r *http.Request) {
-		token := mux.Vars(r)["token"]
-		username, err := server.auClient.Validate(token)
-		if err != nil {
-			server.logger.Print("Got rejected request for token: ", token)
-			http.Error(w, err.Error(), http.StatusForbidden)
-			return
-		}
-		server.logger.Print("Got accepted request for token: ", token)
-		ctx := context.WithValue(r.Context(), "username", username)
-		handler(w, r.WithContext(ctx))
+func (server *server) checkLoggedIn(
+	w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	token := mux.Vars(r)["token"]
+	username, err := server.auClient.Validate(token)
+	if err != nil {
+		server.logger.Print("Got rejected request for token: ", token)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+	server.logger.Print("Got accepted request for token: ", token)
+	ctx := context.WithValue(r.Context(), "username", username)
+	next(w, r.WithContext(ctx))
+}
+
+func (server *server) healthz(w http.ResponseWriter, r *http.Request) {
+	content := server.contentProvider.Get("health")
+	if content != nil {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("ok"))
+	} else {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("no content"))
 	}
 }

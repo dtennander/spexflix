@@ -1,12 +1,27 @@
 package server
 
-import "github.com/gorilla/mux"
+import (
+	"github.com/gorilla/mux"
+	"github.com/urfave/negroni"
+)
 
-func (server *server) createRoutes() *mux.Router {
+func (server *server) createRoutes() *negroni.Negroni {
 	r := mux.NewRouter()
-	r.NewRoute().
+	loggedInMux := mux.NewRouter()
+	loggedInMux.NewRoute().
 		Path("/{token}/content").
 		Methods("GET").
-		HandlerFunc(server.loggedIn(server.getApiHandler()))
-	return r
+		HandlerFunc(server.getApiHandler())
+	r.NewRoute().
+		Path("/healthz").
+		Methods("GET").
+		HandlerFunc(server.healthz)
+
+	r.PathPrefix("/{token}/").Handler(negroni.New(
+		negroni.HandlerFunc(server.checkLoggedIn),
+		negroni.Wrap(loggedInMux)))
+
+	n := negroni.Classic()
+	n.UseHandler(r)
+	return n
 }

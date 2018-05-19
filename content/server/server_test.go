@@ -16,11 +16,12 @@ import (
 
 const testPort = "8282"
 const address = "0.0.0.0"
-const testContent = "testContent"
+
+var testContent = "testContent"
 
 func setUpServerTest() (*server, *auMockClient, *contentMockProvider, *http.Client) {
 	auMockClient := &auMockClient{}
-	contentMockProvider := &contentMockProvider{content: testContent}
+	contentMockProvider := &contentMockProvider{content: &testContent}
 	server := New(
 		contentMockProvider,
 		auMockClient,
@@ -47,13 +48,13 @@ func (c *auMockClient) Validate(token string) (username string, err error) {
 
 type contentMockProvider struct {
 	lastUser string
-	content  string
+	content  *string
 }
 
 func (p *contentMockProvider) Get(username string) (content io.ReadCloser) {
 	p.lastUser = username
 	buff := &bytes.Buffer{}
-	buff.WriteString(p.content)
+	buff.WriteString(*p.content)
 	return ioutil.NopCloser(buff)
 }
 
@@ -108,4 +109,41 @@ func TestGetContentWithInvalidUser(t *testing.T) {
 	buffer.ReadFrom(response.Body)
 	assert.Equal(t, "invalid user\n", buffer.String())
 	assert.Equal(t, "", contentProvider.lastUser)
+}
+
+func TestHealthz(t *testing.T) {
+	// Given
+	target, _, contentProvider, httpClient := setUpServerTest()
+	defer target.StopServer(1 * time.Second)
+	content := "content"
+	contentProvider.content = &content
+	req, err := http.NewRequest("GET", "http://"+address+":"+testPort+"/healthz", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// When
+	rsp, err := httpClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Then
+	assert.Equal(t, http.StatusOK, rsp.StatusCode)
+}
+
+func TestFailingHealthz(t *testing.T) {
+	// Given
+	target, _, contentProvider, httpClient := setUpServerTest()
+	defer target.StopServer(1 * time.Second)
+	contentProvider.content = nil
+	req, err := http.NewRequest("GET", "http://"+address+":"+testPort+"/healthz", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// When
+	rsp, err := httpClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Then
+	assert.Equal(t, http.StatusInternalServerError, rsp.StatusCode)
 }
