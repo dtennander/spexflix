@@ -7,6 +7,7 @@ import (
 	"github.com/urfave/negroni"
 	"log"
 	"os"
+	"time"
 )
 
 var (
@@ -25,6 +26,9 @@ func main() {
 }
 
 func newAuthenticator() server.Authenticator {
-	pool := authentication.NewInMemorySessionPool()
-	return authentication.CreateAuthenticator(pool, nil)
+	au := &authentication.JctAuthenticator{
+		Secret:          "CHANGE ME", //TODO
+		SessionDuration: 7 * 24 * time.Hour,
+	}
+	return au
 }

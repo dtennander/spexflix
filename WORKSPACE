@@ -56,6 +56,12 @@ go_repository(
     importpath = "github.com/urfave/negroni",
 )
 
+go_repository(
+    name = "com_github_dgrijalva_jwt_go",
+    commit = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e",
+    importpath = "github.com/dgrijalva/jwt-go",
+)
+
 load(
     "@io_bazel_rules_docker//go:image.bzl",
     _go_image_repos = "repositories",
