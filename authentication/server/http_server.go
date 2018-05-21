@@ -62,6 +62,21 @@ func (s *server) StopServer(timeout time.Duration) {
 	}
 }
 
+func (s *server) createRouter() http.Handler {
+	router := mux.NewRouter()
+	router.NewRoute().
+		Path("/session/{token}").
+		Methods("POST").
+		HandlerFunc(s.handlePostSession)
+	router.NewRoute().
+		Path("/login").
+		Methods("POST").
+		HandlerFunc(s.handlePostLogin)
+
+	s.middleware.UseHandler(router)
+	return s.middleware
+}
+
 func (s *server) handlePostSession(writer http.ResponseWriter, request *http.Request) {
 	sessionToken := mux.Vars(request)["token"]
 	s.logger.Print("Handeling session/" + sessionToken)

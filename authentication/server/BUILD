@@ -4,7 +4,6 @@ go_library(
     name = "go_default_library",
     srcs = [
         "http_server.go",
-        "routes.go",
     ],
     importpath = "github.com/DiTo04/spexflix/authentication/server",
     visibility = ["//visibility:public"],
