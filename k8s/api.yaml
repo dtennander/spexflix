@@ -1,0 +1,60 @@
+apiVersion: apps/v1beta2 # for versions before 1.8.0 use apps/v1beta1
+kind: Deployment
+metadata:
+  name: api-production
+  labels:
+    app: api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api
+      env: production
+  template:
+    metadata:
+      labels:
+        app: api
+        env: production
+    spec:
+      containers:
+      - name: api
+        image: gcr.io/spexflix/api:dev
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: web
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: web
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+          periodSeconds: 15
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: web
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
+          periodSeconds: 15
+        env:
+        - name: AUTHENTICATION_SERVER
+          value: "authentication"
+        - name: AUTHENTICATION_PORT
+          value: "8080"
+        - name: PORT
+          value: "8080"
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: api
+spec:
+  selector:
+    app: api
+  type: NodePort
+  ports:
+  - name: web
+    protocol: TCP
+    port: 8080
+    targetPort: web

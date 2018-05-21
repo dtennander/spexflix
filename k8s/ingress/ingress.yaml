@@ -11,11 +11,11 @@ spec:
   - host:
     http:
       paths:
-      - path: /*
+      - path: /api/v1/*
         backend:
-          serviceName: front-end
+          serviceName: api
           servicePort: web
-      - path: /test
+      - path: /*
         backend:
           serviceName: front-end
           servicePort: web
