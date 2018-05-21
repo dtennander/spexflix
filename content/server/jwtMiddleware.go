@@ -1,10 +1,11 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"github.com/DiTo04/spexflix/common/codecs"
+	"github.com/gorilla/mux"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -16,14 +17,24 @@ type Poster interface {
 	Post(url string, contentType string, body io.Reader) (*http.Response, error)
 }
 
-type AuthClient struct {
+type JwtMiddleware struct {
 	Client      Poster
 	AuthAddress string
-	Logger      *log.Logger
 	Codec       codecs.Codec
 }
 
-func (c *AuthClient) Validate(token string) (string, error) {
+func (c *JwtMiddleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	token := mux.Vars(r)["token"]
+	username, err := c.validate(token)
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusForbidden)
+		return
+	}
+	ctx := context.WithValue(r.Context(), "username", username)
+	next(rw, r.WithContext(ctx))
+}
+
+func (c *JwtMiddleware) validate(token string) (string, error) {
 	rsp, err := c.Client.Post("http://"+c.AuthAddress+"/session/"+token, "", nil)
 	if err != nil {
 		return "", err

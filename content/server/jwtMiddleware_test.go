@@ -5,9 +5,7 @@ import (
 	"github.com/DiTo04/spexflix/common/codecs"
 	"github.com/DiTo04/spexflix/common/mocks"
 	"github.com/stretchr/testify/assert"
-	"log"
 	"net/http"
-	"os"
 	"testing"
 )
 
@@ -19,15 +17,13 @@ const (
 
 var poster *mocks.MockHttpClient
 
-func setUp(authResponse *http.Response, authError error) *AuthClient {
+func setUp(authResponse *http.Response, authError error) *JwtMiddleware {
 	poster = &mocks.MockHttpClient{
 		Response: authResponse,
 		Error:    authError,
 	}
-	logger := log.New(os.Stdout, "INFO: ", log.Ltime|log.Ldate|log.Lshortfile)
-	return &AuthClient{
+	return &JwtMiddleware{
 		Client:      poster,
-		Logger:      logger,
 		Codec:       codecs.JSON,
 		AuthAddress: testAddress,
 	}
@@ -39,7 +35,7 @@ func TestValidateSuccessful(t *testing.T) {
 	target := setUp(resp, nil)
 
 	// When
-	username, err := target.Validate(token)
+	username, err := target.validate(token)
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -65,13 +61,14 @@ func TestValidateUnAuthenticated(t *testing.T) {
 	target := setUp(rsp, nil)
 
 	// When
-	username, err := target.Validate(token)
+	username, err := target.validate(token)
 
 	// Then
 	assert.Equal(t, "", username)
 	assert.NotNil(t, err)
 	assert.Equal(t, "could not validate user", err.Error())
 }
+
 func getInvalidResponse() *http.Response {
 	return &http.Response{
 		StatusCode: http.StatusForbidden,

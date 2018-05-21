@@ -18,9 +18,8 @@ var (
 
 func main() {
 	logger := log.New(os.Stdout, "INFO: ", log.Ltime|log.Ldate|log.Lshortfile)
-	auClient := &server.AuthClient{
+	auClient := &server.JwtMiddleware{
 		Codec:       codecs.JSON,
-		Logger:      logger,
 		AuthAddress: authAddress + ":" + authPort,
 		Client:      &http.Client{Timeout: 1 * time.Second},
 	}

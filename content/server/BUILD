@@ -3,8 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "go_default_library",
     srcs = [
-        "authClient.go",
-        "routes.go",
+        "jwtMiddleware.go",
         "server.go",
     ],
     importpath = "github.com/DiTo04/spexflix/content/server",
@@ -19,7 +18,7 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
-        "authClient_test.go",
+        "jwtMiddleware_test.go",
         "server_test.go",
     ],
     embed = [":go_default_library"],

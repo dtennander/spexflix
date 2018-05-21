@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"github.com/DiTo04/spexflix/common/codecs"
 	"github.com/stretchr/testify/assert"
@@ -36,14 +37,17 @@ func setUpServerTest() (*server, *auMockClient, *contentMockProvider, *http.Clie
 }
 
 type auMockClient struct {
-	lastToken string
-	username  string
-	error     error
+	username string
+	error    error
 }
 
-func (c *auMockClient) Validate(token string) (username string, err error) {
-	c.lastToken = token
-	return c.username, c.error
+func (c *auMockClient) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	if c.error != nil {
+		http.Error(rw, c.error.Error(), http.StatusForbidden)
+		return
+	}
+	ctx := context.WithValue(r.Context(), "username", c.username)
+	next(rw, r.WithContext(ctx))
 }
 
 type contentMockProvider struct {
@@ -80,7 +84,6 @@ func TestGetContentWithValidUser(t *testing.T) {
 	assert.Equal(t,
 		"{\"username\":\""+testUsername+"\",\"content\":\""+testContent+"\"}\n",
 		buffer.String())
-	assert.Equal(t, token, auClient.lastToken)
 	assert.Equal(t, testUsername, contentProvider.lastUser)
 }
 
