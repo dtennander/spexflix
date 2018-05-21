@@ -6,12 +6,12 @@ metadata:
       kubernetes.io/ingress.global-static-ip-name: k8s-fw-spexflix-production-main-ingress--7925afce811f0a15
 spec:
   tls:
-    - secretName: tls-secret
+    - secretName: spexflix-se-tls
   rules:
   - host:
     http:
       paths:
-      - path: /
+      - path: /*
         backend:
           serviceName: front-end
           servicePort: web

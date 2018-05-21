@@ -1,0 +1,19 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: spexflix-certificate
+  namespace: spexflix-production
+spec:
+  secretName: spexflix-se-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: spexflix.se
+  dnsNames:
+  - spexflix.se
+  acme:
+    config:
+    - http01:
+        ingress: main-ingress
+      domains:
+      - spexflix.se
