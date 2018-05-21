@@ -25,7 +25,8 @@ openssl req -new -x509 -sha256 \
 minikube start
 
 kubectl create namespace spexflix
-kubectl create secret tls tls-secret --cert=${DIR}/server.crt --key=${DIR}/server.key -n spexflix
+kubectl create secret tls tls-secret --cert=${DIR}/server.crt --key=${DIR}/server.key -n spexflix-develop
+kubectl create secret generic jwt-secret --from-literal=secret="ADD YOUR SECRET HERE"
 
 ./redeploy_minikube.sh
 

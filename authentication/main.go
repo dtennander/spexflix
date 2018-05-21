@@ -12,11 +12,13 @@ import (
 
 var (
 	auPort = os.Getenv("AUTHENTICATION_PORT")
+	jwtSecret = os.Getenv("JWT_SECRET")
 )
 
 func main() {
 	if auPort == "" {
 		auPort = "8080"
+		jwtSecret = "IN DEVELOP I HOPE"
 	}
 	logger := log.New(os.Stdout, "INFO: ", log.Ltime|log.Ldate|log.Lshortfile)
 	auth := newAuthenticator()
@@ -27,7 +29,7 @@ func main() {
 
 func newAuthenticator() server.Authenticator {
 	au := &authentication.JctAuthenticator{
-		Secret:          "CHANGE ME", //TODO
+		Secret:          jwtSecret,
 		SessionDuration: 7 * 24 * time.Hour,
 	}
 	return au
