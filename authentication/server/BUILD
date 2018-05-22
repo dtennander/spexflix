@@ -2,9 +2,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "go_default_library",
-    srcs = [
-        "http_server.go",
-    ],
+    srcs = ["http_server.go"],
     importpath = "github.com/DiTo04/spexflix/authentication/server",
     visibility = ["//visibility:public"],
     deps = [
