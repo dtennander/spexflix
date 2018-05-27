@@ -95,3 +95,12 @@ k8s_defaults(
     namespace = "spexflix-production",
     cluster = "gke_spexflix_europe-west1-b_develop",
 )
+
+load("@io_bazel_rules_docker//container:container.bzl", "container_pull")
+
+container_pull(
+    name = "static_nginx_server",
+    registry = "registry.hub.docker.com",
+    repository = "kyma/docker-nginx",
+    digest = "sha256:c7e9c0c5d6b3c9112f644006484926aaadc84d99d960d39894cb2f79c399b026",
+)

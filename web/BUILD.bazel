@@ -1,4 +1,5 @@
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
+load("@io_bazel_rules_docker//container:image.bzl", "container_image")
 genrule(
     name = "yarn_install",
     srcs = [":package.json"],
@@ -31,5 +32,13 @@ genrule(
     outs = ["build.tar"],
     cmd = "tar -xf $(location :workspace) && \
            node_modules/react-scripts/bin/react-scripts.js build && \
-           tar -cf $@ build"
+           tar -C build -cf $@ ."
+)
+
+container_image(
+    name = "image",
+    visibility = ["//visibility:public"],
+    base = "@static_nginx_server//image",
+    tars = [":yarn_build"],
+    directory = "/var/www/",
 )
