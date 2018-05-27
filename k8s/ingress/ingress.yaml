@@ -17,5 +17,5 @@ spec:
           servicePort: web
       - path: /*
         backend:
-          serviceName: front-end
+          serviceName: web
           servicePort: web
