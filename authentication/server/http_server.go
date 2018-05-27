@@ -92,7 +92,11 @@ func (s *server) handlePostSession(writer http.ResponseWriter, request *http.Req
 
 func (s *server) handlePostLogin(writer http.ResponseWriter, request *http.Request) {
 	user := &user{}
-	s.codec.Decode(request.Body, user)
+	if err := s.codec.Decode(request.Body, user); err != nil {
+		s.logger.Print("Could not decode message!")
+		http.Error(writer, "Bad request!", http.StatusBadRequest)
+		return
+	}
 	token, err := s.auth.Login(user.Username, user.Password)
 	if err != nil {
 		s.logger.Print("Wrong username and password!")
