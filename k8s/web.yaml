@@ -30,20 +30,6 @@ spec:
           limits:
             memory: "64Mi"
             cpu: "250m"
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: web
-          initialDelaySeconds: 5
-          timeoutSeconds: 1
-          periodSeconds: 15
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: web
-          initialDelaySeconds: 15
-          timeoutSeconds: 1
-          periodSeconds: 15
 ---
 kind: Service
 apiVersion: v1
