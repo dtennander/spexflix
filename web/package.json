@@ -11,7 +11,8 @@
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.1.4"
   },
-  "proxy": "http://spexflix.se",
+  "proxy": "https://spexflix.se",
+  "homepage" : "https://spexflix.se",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
