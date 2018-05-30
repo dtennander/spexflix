@@ -8,14 +8,10 @@ class Home extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            user: {
-                name: "",
-            },
-            isLoggedIn: isJwtTokenPresent()
+            jwtToken: getJwtToken()
         };
-
-        this.onSuccessfulLogout = this.onSuccessfulLogout.bind(this)
-        this.onSuccessfulLogIn = this.onSuccessfulLogIn.bind(this)
+        this.onSuccessfulLogout = this.onSuccessfulLogout.bind(this);
+        this.onSuccessfulLogIn = this.onSuccessfulLogIn.bind(this);
     }
 
     render() {
@@ -32,7 +28,7 @@ class Home extends Component {
                     <Header
                         isLoggedIn={true}
                         onSuccessfulLogout={this.onSuccessfulLogout}/>
-                    <HomeView user={this.state.user}/>
+                    <HomeView token={this.state.jwtToken}/>
                 </div>
             );
         }
@@ -49,7 +45,7 @@ class Home extends Component {
     }
 }
 
-function isJwtTokenPresent() {
+function getJwtToken() {
     return localStorage.getItem("jwtToken")
 }
 
