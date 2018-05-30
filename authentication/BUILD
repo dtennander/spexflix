@@ -22,3 +22,9 @@ go_image(
     pure = "on",
     visibility = ["//visibility:public"],
 )
+
+go_binary(
+    name = "authentication",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
+)

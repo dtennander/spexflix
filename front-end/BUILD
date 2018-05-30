@@ -40,9 +40,15 @@ go_library(
 
 go_image(
     name = "image",
+    base = ":template_image",
     embed = [":go_default_library"],
     goos = "linux",
     pure = "on",
-    base = ":template_image",
+    visibility = ["//visibility:public"],
+)
+
+go_binary(
+    name = "front-end",
+    embed = [":go_default_library"],
     visibility = ["//visibility:public"],
 )
