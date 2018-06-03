@@ -19,6 +19,7 @@ const inputStyle = {
 class InputField  extends Component {
     constructor(props) {
         super(props);
+        this.updateInput = this.updateInput.bind(this);
         this.state = {
             inputValue: ''
         }
@@ -27,6 +28,7 @@ class InputField  extends Component {
     getStyle() {
         return {...inputStyle, ...this.props.style}
     }
+
     render() {
         return (
             <input
@@ -35,13 +37,18 @@ class InputField  extends Component {
                 name={this.props.name}
                 value={this.state.inputValue}
                 placeholder={this.props.placeholder}
-                onChange={(evt) => this.updateInput(evt.target.value)}/>
+                onKeyDownCapture={this.updateInput}
+                onChange={this.updateInput}/>
         )
     }
 
-    updateInput(newInput) {
+    updateInput(event) {
+        if (event.key === "Enter" && typeof this.props.onEnter !== 'undefined') {
+            this.props.onEnter();
+            return
+        }
         this.setState({
-            inputValue: newInput
+            inputValue: event.target.value
         })
     }
 

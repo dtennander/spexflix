@@ -29,10 +29,22 @@ class LoginForm extends Component {
                     <tbody>
                     <tr>
                         <td width="100px">
-                            <InputField ref={this.email} type="text" name="email" placeholder="e-post"/>
+                            <InputField
+                                ref={this.email}
+                                type="text"
+                                name="email"
+                                placeholder="e-post"
+                                onEnter={this.login}
+                            />
                         </td>
                         <td width="100px">
-                            <InputField ref={this.password} type="password" name="password" placeholder="Lösenord"/>
+                            <InputField
+                                ref={this.password}
+                                type="password"
+                                name="password"
+                                placeholder="Lösenord"
+                                onEnter={this.login}
+                            />
                         </td>
                         <td>
                             <Button text="Logga in" onClick={this.login}/>
