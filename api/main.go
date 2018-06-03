@@ -63,7 +63,7 @@ func proxyTo(backendAddress string) (func(writer http.ResponseWriter, request *h
 	protocol := s[0]
 	return func (writer http.ResponseWriter, request *http.Request) {
 		url := request.URL
-		url.Path = strings.Trim(url.Path, apiPrefix)
+		url.Path = strings.TrimPrefix(url.Path, apiPrefix)
 		url.Host = host
 		url.Scheme = protocol
 		proxyReq, err := http.NewRequest(request.Method, url.String(), request.Body)
@@ -86,7 +86,7 @@ func proxyTo(backendAddress string) (func(writer http.ResponseWriter, request *h
 		}
 
 		writer.Write(body)
-		//writer.WriteHeader(rsp.StatusCode)
+		writer.WriteHeader(rsp.StatusCode)
 	}
 }
 
