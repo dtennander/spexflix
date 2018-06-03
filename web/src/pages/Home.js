@@ -7,8 +7,10 @@ class Home extends Component {
 
     constructor(props) {
         super(props);
+        const jwtToken = getJwtToken();
         this.state = {
-            jwtToken: getJwtToken()
+            jwtToken: jwtToken,
+            isLoggedIn : jwtToken != null
         };
         this.onSuccessfulLogout = this.onSuccessfulLogout.bind(this);
         this.onSuccessfulLogIn = this.onSuccessfulLogIn.bind(this);
