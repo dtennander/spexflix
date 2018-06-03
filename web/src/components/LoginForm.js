@@ -9,6 +9,9 @@ import Api from '../api'
 class LoginForm extends Component {
     constructor(props) {
         super(props);
+        this.state = {
+            loggingIn: false,
+        };
         this.email = React.createRef();
         this.password = React.createRef();
         this.login = this.login.bind(this);
@@ -17,12 +20,22 @@ class LoginForm extends Component {
     login() {
         const email = this.email.current.getInput();
         const password = this.password.current.getInput();
+        this.setState({loggingIn: true});
         Api.LogInUser(email, password)
             .then(this.props.onSuccessfulLogIn)
-            .catch(error => console.log(error))
+            .catch(error => {
+                console.log(error);
+                this.setState({loggingIn: false});
+            })
     }
 
     render() {
+        let buttonText;
+        if (this.state.loggingIn) {
+            buttonText = "Loggar in...";
+        } else {
+            buttonText = "Logga in";
+        }
         return (
             <form method="">
                 <table align="center">
@@ -47,7 +60,7 @@ class LoginForm extends Component {
                             />
                         </td>
                         <td>
-                            <Button text="Logga in" onClick={this.login}/>
+                            <Button text={buttonText} onClick={this.login}/>
                         </td>
                     </tr>
                     </tbody>
