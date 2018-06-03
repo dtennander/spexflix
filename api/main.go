@@ -8,11 +8,15 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"io/ioutil"
+	"strings"
 )
 
+const apiPrefix = "/api/v1"
+
 var (
-	authAddress = os.Getenv("AUTHENTICATION_SERVER")
-	authPort    = os.Getenv("AUTHENTICATION_PORT")
+	usersServiceUrl = os.Getenv("USER_SERVICE")
+	authService = os.Getenv("AUTHENTICATION_SERVICE")
 	port        = os.Getenv("PORT")
 )
 
@@ -24,26 +28,25 @@ func main() {
 		Timeout: 500 * time.Millisecond,
 	}
 	auClient := &AuthClient{
-		AuthAddress: "http://" + authAddress + ":" + authPort,
+		AuthAddress: authService,
 		Client:      httpClient,
 		Codec:       codecs.JSON,
 		Logger:      logger,
 	}
 
-	// health calls
 	r := mux.NewRouter()
-	r.NewRoute().
-		Path("/healthz").
-		Methods("GET").
-		HandlerFunc(healthz)
-	// Api calls
-	apiRouter := r.PathPrefix("/api/v1").Subrouter()
+	apiRouter := r.PathPrefix(apiPrefix).Subrouter()
+
+	//Api Calls
 	apiRouter.NewRoute().
 		Path("/login").
 		Methods("POST").
 		HandlerFunc(makeHandlePostLogin(auClient, logger))
 
-	r.PathPrefix("/api/v1").Handler(apiRouter)
+	apiRouter.PathPrefix("/users").HandlerFunc(proxyTo(usersServiceUrl))
+
+	r.PathPrefix(apiPrefix).Handler(apiRouter)
+	r.HandleFunc("/healthz", healthz)
 	n := negroni.Classic()
 	n.UseHandler(r)
 	if port == "" {
@@ -51,6 +54,40 @@ func main() {
 	}
 	logger.Print("Starting api server on:", port)
 	http.ListenAndServe("0.0.0.0:"+port, n)
+}
+
+func proxyTo(backendAddress string) (func(writer http.ResponseWriter, request *http.Request)) {
+	s := strings.Split(backendAddress, "://")
+	log.Print(s)
+	host := s[1]
+	protocol := s[0]
+	return func (writer http.ResponseWriter, request *http.Request) {
+		url := request.URL
+		url.Path = strings.Trim(url.Path, apiPrefix)
+		url.Host = host
+		url.Scheme = protocol
+		proxyReq, err := http.NewRequest(request.Method, url.String(), request.Body)
+		if err != nil {
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		proxyReq.Header = request.Header
+		client := &http.Client{}
+		rsp, err := client.Do(proxyReq)
+		if err != nil {
+			http.Error(writer, err.Error(), http.StatusBadGateway)
+			return
+		}
+		defer rsp.Body.Close()
+		body, err := ioutil.ReadAll(rsp.Body)
+		if err != nil {
+			http.Error(writer, err.Error(), http.StatusBadGateway)
+			return
+		}
+
+		writer.Write(body)
+		//writer.WriteHeader(rsp.StatusCode)
+	}
 }
 
 func healthz(rw http.ResponseWriter, r *http.Request) {

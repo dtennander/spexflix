@@ -45,10 +45,10 @@ spec:
           timeoutSeconds: 1
           periodSeconds: 15
         env:
-        - name: AUTHENTICATION_SERVER
-          value: "authentication"
-        - name: AUTHENTICATION_PORT
-          value: "8080"
+        - name: AUTHENTICATION_SERVICE
+          value: "http://authentication:8080"
+        - name: USER_SERVICE
+          value: "http://users:8080"
         - name: PORT
           value: "8080"
 ---
