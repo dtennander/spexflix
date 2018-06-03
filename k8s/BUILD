@@ -7,9 +7,9 @@ k8s_objects(
     objects = [
         ":dev-auth",
         ":dev-content",
-        ":dev-front-end",
         ":dev-web",
         ":dev-api",
+        ":dev-users",
     ],
 )
 
@@ -18,9 +18,9 @@ k8s_objects(
     objects = [
         ":production-auth",
         ":production-content",
-        ":production-front-end",
         ":production-web",
         ":production-api",
+        ":production-users",
     ],
 )
 
@@ -29,9 +29,9 @@ k8s_objects(
     objects = [
         ":canary-auth",
         ":canary-content",
-        ":canary-front-end",
         ":canary-web",
         ":canary-api",
+        ":canary-users",
     ],
 )
 
@@ -57,14 +57,6 @@ k8s_dev_deploy(
         "gcr.io/spexflix/content:dev": "//content:image",
     },
     template = ":develop-content.yaml",
-)
-
-k8s_dev_deploy(
-    name = "dev-front-end",
-    images = {
-        "gcr.io/spexflix/front-end:dev": "//front-end:image",
-    },
-    template = ":develop-front-end.yaml",
 )
 
 k8s_dev_deploy(
@@ -108,14 +100,6 @@ k8s_production_deploy(
 )
 
 k8s_production_deploy(
-    name = "production-front-end",
-    images = {
-        "gcr.io/spexflix/front-end:dev": "//front-end:image",
-    },
-    template = "front-end.yaml",
-)
-
-k8s_production_deploy(
     name = "production-web",
     images = {
         "gcr.io/spexflix/web:dev": "//web:image",
@@ -153,14 +137,6 @@ k8s_production_deploy(
         "gcr.io/spexflix/content:dev": "//content:image",
     },
     template = ":canary-content.yaml",
-)
-
-k8s_production_deploy(
-    name = "canary-front-end",
-    images = {
-        "gcr.io/spexflix/front-end:dev": "//front-end:image",
-    },
-    template = ":canary-front-end.yaml",
 )
 
 k8s_production_deploy(
