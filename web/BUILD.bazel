@@ -3,7 +3,10 @@ load("@io_bazel_rules_docker//container:image.bzl", "container_image")
 
 genrule(
     name = "yarn_install",
-    srcs = [":package.json"],
+    srcs = [
+        "package.json",
+        "yarn.lock",
+    ],
     outs = [":node_modules"],
     cmd = "yarn install --prod --modules-folder $@ --non-interactive --frozen-lockfile --cwd $(location package.json)",
 )
