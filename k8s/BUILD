@@ -44,6 +44,14 @@ k8s_dev_deploy(
 )
 
 k8s_dev_deploy(
+    name = "dev-users",
+    images = {
+        "gcr.io/spexflix/users:dev": "//users:image",
+    },
+    template = ":develop-users.yaml",
+)
+
+k8s_dev_deploy(
     name = "dev-content",
     images = {
         "gcr.io/spexflix/content:dev": "//content:image",
@@ -84,6 +92,14 @@ k8s_production_deploy(
 )
 
 k8s_production_deploy(
+    name = "production-users",
+    images = {
+        "gcr.io/spexflix/users:production": "//users:image",
+    },
+    template = ":users.yaml",
+)
+
+k8s_production_deploy(
     name = "production-content",
     images = {
         "gcr.io/spexflix/content:dev": "//content:image",
@@ -121,6 +137,14 @@ k8s_production_deploy(
         "gcr.io/spexflix/authentication:dev": "//authentication:image",
     },
     template = ":canary-authentication.yaml",
+)
+
+k8s_production_deploy(
+    name = "canary-users",
+    images = {
+        "gcr.io/spexflix/users:canary": "//users:image",
+    },
+    template = ":canary-users.yaml",
 )
 
 k8s_production_deploy(

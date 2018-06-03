@@ -104,3 +104,9 @@ container_pull(
     repository = "kyma/docker-nginx",
     digest = "sha256:c7e9c0c5d6b3c9112f644006484926aaadc84d99d960d39894cb2f79c399b026",
 )
+
+go_repository(
+    name = "com_github_auth0_go_jwt_middleware",
+    commit = "5493cabe49f7bfa6e2ec444a09d334d90cd4e2bd",
+    importpath = "github.com/auth0/go-jwt-middleware",
+)
