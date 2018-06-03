@@ -23,6 +23,11 @@ spec:
         env:
         - name: AUTHENTICATION_PORT
           value: "8080"
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         ports:
         - containerPort: 8080
           name: web

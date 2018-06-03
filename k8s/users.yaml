@@ -46,7 +46,10 @@ spec:
           periodSeconds: 15
         env:
         - name: JWT_SECRET
-          value: ""
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
         - name: PORT
           value: "8080"
 ---
