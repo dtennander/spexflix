@@ -94,7 +94,7 @@ k8s_production_deploy(
 k8s_production_deploy(
     name = "production-users",
     images = {
-        "gcr.io/spexflix/users:production": "//users:image",
+        "gcr.io/spexflix/users:dev": "//users:image",
     },
     template = ":users.yaml",
 )
@@ -142,7 +142,7 @@ k8s_production_deploy(
 k8s_production_deploy(
     name = "canary-users",
     images = {
-        "gcr.io/spexflix/users:canary": "//users:image",
+        "gcr.io/spexflix/users:dev": "//users:image",
     },
     template = ":canary-users.yaml",
 )
