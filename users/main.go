@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"github.com/DiTo04/spexflix/common/codecs"
 	"github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
@@ -18,6 +19,7 @@ type controller struct {
 
 type Users interface {
 	getUser(userId int64) (*User, error)
+	postUser(user *User) (int64, error)
 }
 
 type User struct {
@@ -33,6 +35,10 @@ func (c *controller) getRouter() http.Handler {
 		Path("/users/{id}").
 		Methods("GET").
 		HandlerFunc(c.getUser)
+	userRoute.NewRoute().
+		Path("/users/").
+		Methods("POST").
+		HandlerFunc(c.postUser)
 
 	secureHandler := negroni.New()
 	secureHandler.Use(c.getJwtMiddleWare())
@@ -68,6 +74,35 @@ func (c *controller) getUser(writer http.ResponseWriter, request *http.Request) 
 		return
 	}
 	codecs.JSON.Encode(writer, user)
+}
+
+func (c *controller) postUser(w http.ResponseWriter, r *http.Request) {
+	user := &User{}
+	codecs.JSON.Decode(r.Body, user)
+	if err := validateUser(user); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+	id, err := c.users.postUser(user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	user.Id = id
+	codecs.JSON.Encode(w, user)
+}
+
+func validateUser(user *User) error {
+	switch {
+	case user.Id != 0:
+		return errors.New("do not POST user id")
+	case user.Name == "":
+		return errors.New("user should contain name")
+	case user.Email == "":
+		return errors.New("user should contain email")
+	case user.SpexYears == 0:
+		return errors.New("user should contain spex_years")
+	default:
+		return nil
+	}
 }
 
 func (c *controller) healthz(writer http.ResponseWriter, request *http.Request) {

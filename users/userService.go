@@ -8,7 +8,12 @@ import (
 	"time"
 )
 
-type userService struct {
+// userDao is a DAO connecting to a table with the form:
+//  id | first_name | last_name |           email           |     spex_start      |       creation_date
+// ----+------------+-----------+---------------------------+---------------------+----------------------------
+//   2 | David      | Tennander | david.tennander@gmail.com | 2015-08-01 00:00:00 | 2018-06-05 13:24:04.19193
+//   1 | admin      | admin     | admin@karspexet.se        | 1980-08-01 00:00:00 | 2018-06-05 13:23:58.853459
+type userDao struct {
 	db *sql.DB
 }
 
@@ -19,7 +24,7 @@ type dbConfig struct {
 	password                string
 }
 
-func createUserService(databaseConfig dbConfig) (*userService, error) {
+func createUserService(databaseConfig dbConfig) (*userDao, error) {
 	dsn := fmt.Sprintf("host=%s dbname=%s user=%s password=%s sslmode=disable",
 		databaseConfig.instanceConnnectionName,
 		databaseConfig.databaseName,
@@ -29,10 +34,10 @@ func createUserService(databaseConfig dbConfig) (*userService, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &userService{db: db}, nil
+	return &userDao{db: db}, nil
 }
 
-func (u *userService) getUser(userId int64) (*User, error) {
+func (u *userDao) getUser(userId int64) (*User, error) {
 	rows, err := u.db.Query("SELECT * FROM users WHERE id = $1", userId)
 	if err != nil {
 		return nil, err
@@ -54,4 +59,17 @@ func (u *userService) getUser(userId int64) (*User, error) {
 		SpexYears: int(time.Now().Sub(spexTime).Hours() / (24 * 365)),
 	}
 	return user, nil
+}
+
+func (u *userDao) postUser(user *User) (int64, error) {
+	result, err := u.db.Exec("INSERT INTO (first_name, last_name, email, spex_start) VALUE ($1,$2,$3,$4)",
+		user.Name, user.Name, user.Email, user.SpexYears)
+	if err != nil {
+		return -1, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return -1, err
+	}
+	return id, nil
 }

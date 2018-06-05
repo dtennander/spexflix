@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"github.com/DiTo04/spexflix/common/codecs"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -9,7 +11,14 @@ import (
 
 const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtZSI6ImFkbWluIiwiZXhwIjoxNTI4MzA3NzgzLCJmZiI6MH0.cn4ntJoyDugH6MKJRZwYMMOtq56GB53SzmG9PLRl0O4"
 
+var userIds int64 = 1
+
 type mockUsers map[int64]User
+
+func (u mockUsers) postUser(user *User) (int64, error) {
+	userIds = userIds + 1
+	return userIds, nil
+}
 
 func (u mockUsers) getUser(userId int64) (*User, error) {
 	user := u[userId]
@@ -74,4 +83,93 @@ func TestHealthz(t *testing.T) {
 
 	// Then
 	assert.Equal(t, http.StatusOK, requestRecorder.Code)
+}
+
+func TestPostUser(t *testing.T) {
+	controller := &controller{
+		jwtSecret: "",
+		users:     users,
+	}
+	target := controller.getRouter()
+	body := &bytes.Buffer{}
+	codecs.JSON.Encode(body, User{
+		Name:      "tester",
+		Email:     "tester@spexflix.se",
+		SpexYears: 10,
+	})
+	req := httptest.NewRequest("POST", "/users/", body)
+	req.Header.Add("Authorization", "Bearer "+token)
+	requestRecorder := httptest.NewRecorder()
+
+	// when
+	target.ServeHTTP(requestRecorder, req)
+
+	// Then
+	assert.Equal(t, http.StatusOK, requestRecorder.Code)
+	resultingUser := &User{}
+	codecs.JSON.Decode(requestRecorder.Body, resultingUser)
+	assert.Equal(t, userIds, resultingUser.Id)
+}
+
+func TestUserValidationn(t *testing.T) {
+	// Given
+	user := &User{
+		Name:      "Tester",
+		Email:     "tester@spexflix.se",
+		SpexYears: 10,
+	}
+	// When
+	err := validateUser(user)
+	// Then
+	assert.Nil(t, err)
+}
+
+func TestUserValidation2(t *testing.T) {
+	// Given
+	user := &User{
+		Email:     "tester@spexflix.se",
+		SpexYears: 10,
+	}
+	// When
+	err := validateUser(user)
+	// Then
+	assert.NotNil(t, err)
+}
+
+func TestUserValidation3(t *testing.T) {
+	// Given
+	user := &User{
+		Name:      "Tester",
+		SpexYears: 10,
+	}
+	// When
+	err := validateUser(user)
+	// Then
+	assert.NotNil(t, err)
+}
+
+func TestUserValidation4(t *testing.T) {
+	// Given
+	user := &User{
+		Name:  "Tester",
+		Email: "tester@spexflix.se",
+	}
+	// When
+	err := validateUser(user)
+	// Then
+	assert.NotNil(t, err)
+}
+
+func TestUserValidation5(t *testing.T) {
+	// Given
+	user := &User{
+		Id:        1,
+		Name:      "Tester",
+		Email:     "tester@spexflix.se",
+		SpexYears: 10,
+	}
+	// When
+	err := validateUser(user)
+	// Then
+	assert.NotNil(t, err)
 }
