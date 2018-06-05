@@ -111,6 +111,29 @@ func TestPostUser(t *testing.T) {
 	assert.Equal(t, userIds, resultingUser.Id)
 }
 
+func TestPostUserUnAuthorized(t *testing.T) {
+	controller := &controller{
+		jwtSecret: "",
+		users:     users,
+	}
+	target := controller.getRouter()
+	body := &bytes.Buffer{}
+	codecs.JSON.Encode(body, User{
+		Name:      "tester",
+		Email:     "tester@spexflix.se",
+		SpexYears: 10,
+	})
+	req := httptest.NewRequest("POST", "/users/", body)
+	req.Header.Add("Authorization", "Bearer "+token+"1")
+	requestRecorder := httptest.NewRecorder()
+
+	// when
+	target.ServeHTTP(requestRecorder, req)
+
+	// Then
+	assert.Equal(t, http.StatusUnauthorized, requestRecorder.Code)
+}
+
 func TestUserValidationn(t *testing.T) {
 	// Given
 	user := &User{
