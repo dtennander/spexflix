@@ -62,6 +62,42 @@ go_repository(
     importpath = "github.com/dgrijalva/jwt-go",
 )
 
+go_repository(
+    name = "com_github_auth0_go_jwt_middleware",
+    commit = "5493cabe49f7bfa6e2ec444a09d334d90cd4e2bd",
+    importpath = "github.com/auth0/go-jwt-middleware",
+)
+
+go_repository(
+    name = "com_github_googlecloudplatform_cloudsql_proxy",
+    commit = "74e2f41327763e6a859d91ceff9133e73a14bb3d",
+    importpath = "github.com/GoogleCloudPlatform/cloudsql-proxy",
+)
+
+go_repository(
+    name = "com_github_lib_pq",
+    commit = "90697d60dd844d5ef6ff15135d0203f65d2f53b8",
+    importpath = "github.com/lib/pq",
+)
+
+go_repository(
+    name = "org_golang_x_oauth2",
+    commit = "1e0a3fa8ba9a5c9eb35c271780101fdaf1b205d7",
+    importpath = "golang.org/x/oauth2",
+)
+
+go_repository(
+    name = "com_google_cloud_go",
+    commit = "7219c21b03ae13acf812621221f3ca5c0f1e769f",
+    importpath = "cloud.google.com/go",
+)
+
+go_repository(
+    name = "org_golang_google_api",
+    commit = "00e3bb8d04691e25ee2fccf98c866bcb7925c3ec",
+    importpath = "google.golang.org/api",
+)
+
 load(
     "@io_bazel_rules_docker//go:image.bzl",
     _go_image_repos = "repositories",
@@ -103,10 +139,4 @@ container_pull(
     registry = "registry.hub.docker.com",
     repository = "kyma/docker-nginx",
     digest = "sha256:c7e9c0c5d6b3c9112f644006484926aaadc84d99d960d39894cb2f79c399b026",
-)
-
-go_repository(
-    name = "com_github_auth0_go_jwt_middleware",
-    commit = "5493cabe49f7bfa6e2ec444a09d334d90cd4e2bd",
-    importpath = "github.com/auth0/go-jwt-middleware",
 )

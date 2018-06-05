@@ -1,30 +1,30 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
-	"net/http"
 	"github.com/DiTo04/spexflix/common/codecs"
-	"os"
-	"github.com/urfave/negroni"
 	"github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gorilla/mux"
+	"github.com/urfave/negroni"
+	"net/http"
+	"os"
 	"strconv"
 )
 
 type controller struct {
 	jwtSecret string
-	users Users
+	users     Users
 }
 
 type Users interface {
-	getUser(userId int64) User
+	getUser(userId int64) (*User, error)
 }
 
 type User struct {
-	Id int64 `json:"id"`
-	Name string `json:"name"`
-	Email string `json:"email"`
-	SpexYears int `json:"spex_years"`
+	Id        int64  `json:"id"`
+	Name      string `json:"name"`
+	Email     string `json:"email"`
+	SpexYears int    `json:"spex_years"`
 }
 
 func (c *controller) getRouter() http.Handler {
@@ -32,7 +32,7 @@ func (c *controller) getRouter() http.Handler {
 	userRoute.NewRoute().
 		Path("/users/{id}").
 		Methods("GET").
-		HandlerFunc(c.makeGetUserHandler)
+		HandlerFunc(c.getUser)
 
 	secureHandler := negroni.New()
 	secureHandler.Use(c.getJwtMiddleWare())
@@ -47,7 +47,7 @@ func (c *controller) getRouter() http.Handler {
 	return n
 }
 
-func (c *controller) getJwtMiddleWare() (negroni.HandlerFunc) {
+func (c *controller) getJwtMiddleWare() negroni.HandlerFunc {
 	jwtFunc := jwtmiddleware.New(jwtmiddleware.Options{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
 			return []byte(c.jwtSecret), nil
@@ -56,37 +56,45 @@ func (c *controller) getJwtMiddleWare() (negroni.HandlerFunc) {
 	return negroni.HandlerFunc(jwtFunc)
 }
 
-
-func (c *controller) makeGetUserHandler(writer http.ResponseWriter, request *http.Request) {
+func (c *controller) getUser(writer http.ResponseWriter, request *http.Request) {
 	id, err := strconv.ParseInt(mux.Vars(request)["id"], 10, 64)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	writer.WriteHeader(http.StatusOK)
-	codecs.JSON.Encode(writer, c.users.getUser(id))
+	user, err := c.users.getUser(id)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	codecs.JSON.Encode(writer, user)
 }
 
-
 func (c *controller) healthz(writer http.ResponseWriter, request *http.Request) {
-	writer.WriteHeader(http.StatusOK)
 	codecs.JSON.Encode(writer, "Everything's fine!")
 }
 
 func main() {
-	port      := os.Getenv("PORT")
+	port := os.Getenv("PORT")
 	jwtSecret := os.Getenv("JWT_SECRET")
-	controller := factory(jwtSecret)
+	dbConfig := dbConfig{
+		instanceConnnectionName: os.Getenv("DB_INSTANCE_CONNECTION_NAME"),
+		databaseName:            os.Getenv("DB_NAME"),
+		user:                    os.Getenv("DB_USER"),
+		password:                os.Getenv("DB_PASSWORD"),
+	}
+	controller := factory(jwtSecret, dbConfig)
 	router := controller.getRouter()
-	http.ListenAndServe(":" + port, router)
+	http.ListenAndServe(":"+port, router)
 }
 
-func factory(jwtToken string) *controller {
+func factory(jwtToken string, config dbConfig) *controller {
+	users, err := createUserService(config)
+	if err != nil {
+		panic(err)
+	}
 	return &controller{
-		jwtSecret:jwtToken,
-		users:&userService{},
+		jwtSecret: jwtToken,
+		users:     users,
 	}
 }
-
-
-//claim := request.Context().Value("user").(*jwt.Token).Claims.(jwt.MapClaims)
-//		id :=int64(claim["id"].(float64))

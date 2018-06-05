@@ -13,6 +13,7 @@ go_library(
         "//common/codecs:go_default_library",
         "@com_github_auth0_go_jwt_middleware//:go_default_library",
         "@com_github_dgrijalva_jwt_go//:go_default_library",
+        "@com_github_googlecloudplatform_cloudsql_proxy//proxy/dialers/postgres:go_default_library",
         "@com_github_gorilla_mux//:go_default_library",
         "@com_github_urfave_negroni//:go_default_library",
     ],

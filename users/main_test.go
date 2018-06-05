@@ -1,9 +1,9 @@
 package main
 
 import (
-	"net/http/httptest"
 	"github.com/stretchr/testify/assert"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -11,8 +11,9 @@ const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtZSI6ImFkbWlu
 
 type mockUsers map[int64]User
 
-func (u mockUsers) getUser(userId int64) User {
-	return u[userId]
+func (u mockUsers) getUser(userId int64) (*User, error) {
+	user := u[userId]
+	return &user, nil
 }
 
 var users = mockUsers{
@@ -27,11 +28,11 @@ var users = mockUsers{
 func TestGetUser(t *testing.T) {
 	controller := &controller{
 		jwtSecret: "",
-		users: users,
+		users:     users,
 	}
 	target := controller.getRouter()
 	req := httptest.NewRequest("GET", "/users/2", nil)
-	req.Header.Add("Authorization", "Bearer " + token)
+	req.Header.Add("Authorization", "Bearer "+token)
 	requestRecorder := httptest.NewRecorder()
 
 	// when
@@ -45,11 +46,11 @@ func TestGetUser(t *testing.T) {
 func TestGetUserWithoutAccess(t *testing.T) {
 	controller := &controller{
 		jwtSecret: "",
-		users: users,
+		users:     users,
 	}
 	target := controller.getRouter()
 	req := httptest.NewRequest("GET", "/users/2", nil)
-	req.Header.Add("Authorization", "Bearer " + token + "1")
+	req.Header.Add("Authorization", "Bearer "+token+"1")
 	requestRecorder := httptest.NewRecorder()
 
 	// when
@@ -62,7 +63,7 @@ func TestGetUserWithoutAccess(t *testing.T) {
 func TestHealthz(t *testing.T) {
 	controller := &controller{
 		jwtSecret: "",
-		users: users,
+		users:     users,
 	}
 	target := controller.getRouter()
 	req := httptest.NewRequest("GET", "/healthz", nil)

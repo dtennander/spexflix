@@ -44,6 +44,10 @@ spec:
           initialDelaySeconds: 15
           timeoutSeconds: 1
           periodSeconds: 15
+        volumeMounts:
+        - name: cloudsql-instance-credentials
+          mountPath: /secrets/cloudsql
+          readOnly: true
         env:
         - name: JWT_SECRET
           valueFrom:
@@ -52,6 +56,26 @@ spec:
               key: secret
         - name: PORT
           value: "8080"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: cloudsql-db-credentials
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cloudsql-db-credentials
+              key: password
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: "/secrets/cloudsql/credentials.json"
+        - name: DB_NAME
+          value: "users"
+        - name: DB_INSTANCE_CONNECTION_NAME
+          value: "spexflix:europe-west1:spexflix-users"
+      volumes:
+        - name: cloudsql-instance-credentials
+          secret:
+            secretName: cloudsql-instance-credentials
 ---
 kind: Service
 apiVersion: v1
