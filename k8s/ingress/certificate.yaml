@@ -11,9 +11,11 @@ spec:
   commonName: spexflix.se
   dnsNames:
   - spexflix.se
+  - theodor.spexflix.se
   acme:
     config:
     - http01:
         ingress: main-ingress
       domains:
       - spexflix.se
+      - theodor.spexflix.se

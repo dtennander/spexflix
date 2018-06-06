@@ -9,7 +9,13 @@ spec:
   tls:
     - secretName: spexflix-se-tls
   rules:
-  - host:
+  - host: theodor.spexflix.se
+    http:
+      paths:
+      - backend:
+          serviceName: theodor
+          servicePort: web
+  - host: spexflix.se
     http:
       paths:
       - path: /api/v1/*

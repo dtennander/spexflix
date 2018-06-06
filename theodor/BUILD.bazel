@@ -1,0 +1,61 @@
+load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
+load("@io_bazel_rules_docker//container:image.bzl", "container_image")
+load("@io_bazel_rules_k8s//k8s:object.bzl", "k8s_object")
+load("@k8s_production_deploy//:defaults.bzl", "k8s_production_deploy")
+
+genrule(
+    name = "yarn_install",
+    srcs = [
+        "package.json",
+        "yarn.lock",
+    ],
+    outs = [":node_modules"],
+    cmd = "yarn install --prod --modules-folder $@ --non-interactive --frozen-lockfile --cwd $(location package.json)",
+)
+
+pkg_tar(
+    name = "locked_deps",
+    srcs = [
+        "package.json",
+        "yarn.lock",
+        ":yarn_install",
+    ],
+    strip_prefix = ".",
+)
+
+pkg_tar(
+    name = "workspace",
+    srcs = glob([
+        "src/**/*",
+        "public/**/*",
+    ]),
+    strip_prefix = ".",
+    deps = [
+        ":locked_deps",
+    ],
+)
+
+genrule(
+    name = "yarn_build",
+    srcs = [":workspace"],
+    outs = ["build.tar"],
+    cmd = "tar -xf $(location :workspace) && \
+           node_modules/react-scripts/bin/react-scripts.js build && \
+           tar -C build -cf $@ .",
+)
+
+container_image(
+    name = "image",
+    base = "@static_nginx_server//image",
+    directory = "/var/www/",
+    tars = [":yarn_build"],
+    visibility = ["//visibility:public"],
+)
+
+k8s_production_deploy(
+    name = "deploy",
+    images = {
+        "gcr.io/spexflix/theodor:dev": ":image",
+    },
+    template = ":theodor.yaml",
+)
