@@ -51,6 +51,7 @@ func (c *controller) getRouter() http.Handler {
 
 	mainRouter := mux.NewRouter()
 	mainRouter.HandleFunc("/healthz", c.healthz)
+	mainRouter.HandleFunc("/id", c.getId)
 	mainRouter.PathPrefix("/users").Handler(secureHandler)
 
 	n := negroni.Classic()
@@ -79,6 +80,20 @@ func (c *controller) getUser(writer http.ResponseWriter, request *http.Request) 
 		return
 	}
 	codecs.JSON.Encode(writer, user)
+}
+
+func (c *controller) getId(writer http.ResponseWriter, request *http.Request) {
+	email := request.URL.Query().Get("email")
+	users, err := c.users.queryUsers(email)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if len(users) == 0 {
+		http.Error(writer, "could not find user", http.StatusNotFound)
+		return
+	}
+	codecs.JSON.Encode(writer, users[0].Id)
 }
 
 func (c *controller) getUserByQuery(writer http.ResponseWriter, request *http.Request) {

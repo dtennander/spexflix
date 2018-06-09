@@ -6,7 +6,6 @@ import (
 	_ "github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/postgres"
 	"strconv"
 	"time"
-	"errors"
 )
 
 // userDao is a DAO connecting to a table with the form:
@@ -51,7 +50,7 @@ func (u *userDao) getUser(userId int64) (*User, error) {
 	return users[0], nil
 }
 
-func getUsersFromRows(rows *sql.Rows) ([]*User, error){
+func getUsersFromRows(rows *sql.Rows) ([]*User, error) {
 	var id, firstName, lastName, email, spexStart, creationDate string
 	users := make([]*User, 0)
 	for rows.Next() {
@@ -81,9 +80,6 @@ func (u *userDao) queryUsers(email string) ([]*User, error) {
 	users, err := getUsersFromRows(rows)
 	if err != nil {
 		return nil, err
-	}
-	if len(users) == 0 {
-		return nil, errors.New("No matching users...")
 	}
 	return users, nil
 }

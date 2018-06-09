@@ -2,17 +2,18 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"github.com/DiTo04/spexflix/common/codecs"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"errors"
 )
 
 const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtZSI6ImFkbWluIiwiZXhwIjoxNTYwMTExODg5LCJmZiI6MH0.lS_vLAKgohK2vr7zqnAeap67a5vJbzML_DYToXySh2Y"
 
 var userIds int64 = 1
+
 const email = "tester@karspexet.se"
 
 type mockUsers map[int64]User
@@ -146,13 +147,13 @@ func TestPostUserUnAuthorized(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, requestRecorder.Code)
 }
 
-func TestGetIdFromEmail(t *testing.T) {
+func TestGetUserFromEmail(t *testing.T) {
 	controller := &controller{
 		jwtSecret: "Secret",
 		users:     users,
 	}
 	target := controller.getRouter()
-	req := httptest.NewRequest("GET", "/users?email=" + email, nil)
+	req := httptest.NewRequest("GET", "/users?email="+email, nil)
 	req.Header.Add("Authorization", "Bearer "+token)
 	requestRec := httptest.NewRecorder()
 
@@ -169,14 +170,14 @@ func TestGetIdFromEmail(t *testing.T) {
 	assert.Equal(t, email, rsp[0].Email)
 }
 
-func TestGetIdFromEmailIsProtoceted(t *testing.T) {
+func TestGetUserFromEmailIsProtected(t *testing.T) {
 	controller := &controller{
 		jwtSecret: "Secret",
 		users:     users,
 	}
 	target := controller.getRouter()
-	req := httptest.NewRequest("GET", "/users?email=" + email, nil)
-	req.Header.Add("Authorization", "Bearer " + token + "1")
+	req := httptest.NewRequest("GET", "/users?email="+email, nil)
+	req.Header.Add("Authorization", "Bearer "+token+"1")
 	requestRec := httptest.NewRecorder()
 
 	// When
@@ -184,6 +185,23 @@ func TestGetIdFromEmailIsProtoceted(t *testing.T) {
 
 	// Then
 	assert.Equal(t, http.StatusUnauthorized, requestRec.Code)
+}
+
+func TestGetIdFromEmail(t *testing.T) {
+	controller := &controller{
+		jwtSecret: "Secret",
+		users:     users,
+	}
+	target := controller.getRouter()
+	req := httptest.NewRequest("GET", "/id?email="+email, nil)
+	requestRec := httptest.NewRecorder()
+
+	// When
+	target.ServeHTTP(requestRec, req)
+
+	// Then
+	assert.Equal(t, http.StatusOK, requestRec.Code)
+	assert.Equal(t, "2\n", requestRec.Body.String())
 }
 
 func TestUserValidationn(t *testing.T) {
