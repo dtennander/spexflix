@@ -23,7 +23,10 @@ go_test(
     name = "go_default_test",
     srcs = ["main_test.go"],
     embed = [":go_default_library"],
-    deps = ["@com_github_stretchr_testify//assert:go_default_library"],
+    deps = [
+        "//common/codecs:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
+    ],
 )
 
 go_image(

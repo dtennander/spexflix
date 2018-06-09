@@ -1,7 +1,6 @@
 package server
 
 import (
-	"bytes"
 	"context"
 	"github.com/DiTo04/spexflix/common/codecs"
 	"github.com/gorilla/mux"
@@ -10,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"bytes"
 )
 
 type TokenValidator interface {
