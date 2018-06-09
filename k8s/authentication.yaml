@@ -20,17 +20,6 @@ spec:
       - name: auth
         image: gcr.io/spexflix/authentication:dev
         imagePullPolicy: Always
-        env:
-        - name: AUTHENTICATION_PORT
-          value: "8080"
-        - name: JWT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: jwt-secret
-              key: secret
-        ports:
-        - containerPort: 8080
-          name: web
         resources:
           requests:
             memory: "10Mi"
@@ -38,6 +27,43 @@ spec:
           limits:
             memory: "24Mi"
             cpu: "500m"
+        env:
+        - name: AUTHENTICATION_PORT
+          value: "8080"
+        - name: USERS_SERVICE
+          value: "http://users:8080"
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: cloudsql-db-credentials
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cloudsql-db-credentials
+              key: password
+        - name: DB_NAME
+          value: "users"
+        - name: DB_CONNECTION
+          value: "spexflix:europe-west1:spexflix-users"
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: "/secrets/cloudsql/credentials.json"
+        ports:
+        - containerPort: 8080
+          name: web
+        volumeMounts:
+        - name: cloudsql-instance-credentials
+          mountPath: /secrets/cloudsql
+          readOnly: true
+      volumes:
+        - name: cloudsql-instance-credentials
+          secret:
+            secretName: cloudsql-instance-credentials
 ---
 kind: Service
 apiVersion: v1

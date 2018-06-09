@@ -140,3 +140,15 @@ container_pull(
     repository = "kyma/docker-nginx",
     digest = "sha256:c7e9c0c5d6b3c9112f644006484926aaadc84d99d960d39894cb2f79c399b026",
 )
+
+go_repository(
+    name = "org_golang_x_crypto",
+    commit = "8ac0e0d97ce45cd83d1d7243c060cb8461dda5e9",
+    importpath = "golang.org/x/crypto",
+)
+
+go_repository(
+    name = "com_github_golang_mock",
+    commit = "22bbf0ddf08105dfa364d0a2fa619dfa71014af5",
+    importpath = "github.com/golang/mock",
+)

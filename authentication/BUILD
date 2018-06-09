@@ -4,7 +4,10 @@ load("@io_bazel_rules_docker//container:container.bzl", "container_push", "conta
 
 go_library(
     name = "go_default_library",
-    srcs = ["main.go"],
+    srcs = [
+        "UserClient.go",
+        "main.go",
+    ],
     importpath = "github.com/DiTo04/spexflix/authentication",
     visibility = ["//visibility:private"],
     deps = [

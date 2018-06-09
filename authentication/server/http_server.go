@@ -86,7 +86,6 @@ func (s *server) handlePostSession(writer http.ResponseWriter, request *http.Req
 		http.Error(writer, "Could not Authenticate!", http.StatusForbidden)
 		return
 	}
-	writer.WriteHeader(http.StatusOK)
 	s.codec.Encode(writer, &user{Username: *username})
 }
 
@@ -99,10 +98,9 @@ func (s *server) handlePostLogin(writer http.ResponseWriter, request *http.Reque
 	}
 	token, err := s.auth.Login(user.Username, user.Password)
 	if err != nil {
-		s.logger.Print("Wrong username and password!")
+		s.logger.Print(err)
 		http.Error(writer, "Wrong username and password!", http.StatusForbidden)
 		return
 	}
-	writer.WriteHeader(http.StatusOK)
 	s.codec.Encode(writer, token)
 }

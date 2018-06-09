@@ -28,9 +28,24 @@ func main() {
 }
 
 func newAuthenticator() server.Authenticator {
+	dbConfig := authentication.DbConfig{
+		User: os.Getenv("DB_USER"),
+		Password: os.Getenv("DB_PASSWORD"),
+		InstanceConnnectionName: os.Getenv("DB_CONNECTION"),
+	}
+
+	hashStore, err := authentication.CreateAuthDao(dbConfig)
+	if err != nil {
+		panic(err)
+	}
+	userService := &userClient{
+		serviceAdress: os.Getenv("USERS_SERVICE"),
+	}
 	au := &authentication.JwtAuthenticator{
 		Secret:          jwtSecret,
 		SessionDuration: 7 * 24 * time.Hour,
+		HashStore: hashStore,
+		UserService: userService,
 	}
 	return au
 }

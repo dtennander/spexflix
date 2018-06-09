@@ -5,21 +5,36 @@ import (
 	jwt2 "github.com/DiTo04/spexflix/common/jwt"
 	"github.com/dgrijalva/jwt-go"
 	"time"
+	"golang.org/x/crypto/bcrypt"
 )
+
+type HashStore interface {
+	GetHash(i int64) ([]byte, error)
+}
+
+type UserService interface {
+	GetUserId(email string) (int64, error)
+}
 
 type JwtAuthenticator struct {
 	Secret          string
 	SessionDuration time.Duration
+	HashStore       HashStore
+	UserService     UserService
 }
 
-func (a *JwtAuthenticator) Login(username string, password string) (token string, err error) {
-	if !a.authenticate(username, password) {
-		return "", errors.New("invalid password")
+func (a *JwtAuthenticator) Login(email string, password string) (token string, err error) {
+	id, err := a.UserService.GetUserId(email)
+	if err != nil {
+		return "", err
+	}
+	if err := a.authenticate(id, password); err != nil {
+		return "", errors.New("invalid Password")
 	}
 	soon := time.Now().Add(a.SessionDuration)
 	claims := &jwt2.SessionClaims{
-		UserId:         1, //TODO
-		Username:       username,
+		UserId:         id,
+		Username:       email,
 		ExpirationTime: soon.Unix(),
 		FeatureFlags:   0,
 	}
@@ -40,6 +55,14 @@ func (a *JwtAuthenticator) AuthenticateSession(tokenString string) (username *st
 	return &name
 }
 
-func (a *JwtAuthenticator) authenticate(email string, password string) bool {
-	return email == "admin" && password == "kakakaka"
+func (a *JwtAuthenticator) authenticate(id int64, password string) (error) {
+	hash, err := a.HashStore.GetHash(id)
+	if err != nil {
+		return err
+	}
+	err = bcrypt.CompareHashAndPassword(hash, []byte(password))
+	if err != nil {
+		return err
+	}
+	return nil
 }
