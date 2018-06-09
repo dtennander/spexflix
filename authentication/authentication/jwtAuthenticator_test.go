@@ -10,7 +10,7 @@ func TestLogin(t *testing.T) {
 	// Given
 	username := "admin"
 	password := "kakakaka"
-	target := &JctAuthenticator{
+	target := &JwtAuthenticator{
 		SessionDuration: time.Minute,
 		Secret:          "Secret"}
 	// When
@@ -24,7 +24,7 @@ func TestAuthenticate(t *testing.T) {
 	// Given
 	username := "admin"
 	password := "kakakaka"
-	target := &JctAuthenticator{
+	target := &JwtAuthenticator{
 		SessionDuration: time.Minute,
 		Secret:          "Secret",
 	}

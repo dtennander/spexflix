@@ -6,6 +6,7 @@ import (
 	_ "github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/postgres"
 	"strconv"
 	"time"
+	"errors"
 )
 
 // userDao is a DAO connecting to a table with the form:
@@ -43,22 +44,48 @@ func (u *userDao) getUser(userId int64) (*User, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	var id, firstName, lastName, email, spexStart, creationDate string
-	for rows.Next() {
-		rows.Scan(&id, &firstName, &lastName, &email, &spexStart, &creationDate)
-	}
-	spexTime, err := time.Parse(time.RFC3339, spexStart)
+	users, err := getUsersFromRows(rows)
 	if err != nil {
 		return nil, err
 	}
-	idInt, err := strconv.ParseInt(id, 10, 64)
-	user := &User{
-		Id:        idInt,
-		Email:     email,
-		Name:      firstName,
-		SpexYears: int(time.Now().Sub(spexTime).Hours() / (24 * 365)),
+	return users[0], nil
+}
+
+func getUsersFromRows(rows *sql.Rows) ([]*User, error){
+	var id, firstName, lastName, email, spexStart, creationDate string
+	users := make([]*User, 0)
+	for rows.Next() {
+		rows.Scan(&id, &firstName, &lastName, &email, &spexStart, &creationDate)
+		spexTime, err := time.Parse(time.RFC3339, spexStart)
+		if err != nil {
+			return nil, err
+		}
+		idInt, err := strconv.ParseInt(id, 10, 64)
+		user := &User{
+			Id:        idInt,
+			Email:     email,
+			Name:      firstName,
+			SpexYears: int(time.Now().Sub(spexTime).Hours() / (24 * 365)),
+		}
+		users = append(users, user)
 	}
-	return user, nil
+	return users, nil
+}
+
+func (u *userDao) queryUsers(email string) ([]*User, error) {
+	rows, err := u.db.Query("SELECT * FROM users WHERE email = $1", email)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	users, err := getUsersFromRows(rows)
+	if err != nil {
+		return nil, err
+	}
+	if len(users) == 0 {
+		return nil, errors.New("No matching users...")
+	}
+	return users, nil
 }
 
 func (u *userDao) postUser(user *User) (int64, error) {

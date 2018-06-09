@@ -20,25 +20,30 @@ type controller struct {
 type Users interface {
 	getUser(userId int64) (*User, error)
 	postUser(user *User) (int64, error)
+	queryUsers(email string) ([]*User, error)
 }
 
 type User struct {
 	Id        int64  `json:"id"`
-	Name      string `json:"name"`
-	Email     string `json:"email"`
-	SpexYears int    `json:"spex_years"`
+	Name      string `json:"name,omitempty"`
+	Email     string `json:"email,omitempty"`
+	SpexYears int    `json:"spex_years,omitempty"`
 }
 
 func (c *controller) getRouter() http.Handler {
-	userRoute := mux.NewRouter()
+	userRoute := mux.NewRouter().StrictSlash(true)
 	userRoute.NewRoute().
 		Path("/users/{id}").
 		Methods("GET").
 		HandlerFunc(c.getUser)
 	userRoute.NewRoute().
-		Path("/users/").
+		Path("/users").
 		Methods("POST").
 		HandlerFunc(c.postUser)
+	userRoute.NewRoute().
+		Path("/users").
+		Methods("GET").
+		HandlerFunc(c.getUserByQuery)
 
 	secureHandler := negroni.New()
 	secureHandler.Use(c.getJwtMiddleWare())
@@ -74,6 +79,16 @@ func (c *controller) getUser(writer http.ResponseWriter, request *http.Request) 
 		return
 	}
 	codecs.JSON.Encode(writer, user)
+}
+
+func (c *controller) getUserByQuery(writer http.ResponseWriter, request *http.Request) {
+	email := request.URL.Query().Get("email")
+	users, err := c.users.queryUsers(email)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	codecs.JSON.Encode(writer, users)
 }
 
 func (c *controller) postUser(w http.ResponseWriter, r *http.Request) {

@@ -7,13 +7,25 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"errors"
 )
 
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtZSI6ImFkbWluIiwiZXhwIjoxNTI4MzA3NzgzLCJmZiI6MH0.cn4ntJoyDugH6MKJRZwYMMOtq56GB53SzmG9PLRl0O4"
+const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtZSI6ImFkbWluIiwiZXhwIjoxNTYwMTExODg5LCJmZiI6MH0.lS_vLAKgohK2vr7zqnAeap67a5vJbzML_DYToXySh2Y"
 
 var userIds int64 = 1
+const email = "tester@karspexet.se"
 
 type mockUsers map[int64]User
+
+func (u mockUsers) queryUsers(emailAdress string) ([]*User, error) {
+	if email != emailAdress {
+		return make([]*User, 0), errors.New("email: " + emailAdress)
+	}
+	users := make([]*User, 1)
+	user := u[2]
+	users[0] = &user
+	return users, nil
+}
 
 func (u mockUsers) postUser(user *User) (int64, error) {
 	userIds = userIds + 1
@@ -29,14 +41,14 @@ var users = mockUsers{
 	2: {
 		Id:        2,
 		Name:      "testUser",
-		Email:     "tester@karspexet.se",
+		Email:     email,
 		SpexYears: 10,
 	},
 }
 
 func TestGetUser(t *testing.T) {
 	controller := &controller{
-		jwtSecret: "",
+		jwtSecret: "Secret",
 		users:     users,
 	}
 	target := controller.getRouter()
@@ -54,7 +66,7 @@ func TestGetUser(t *testing.T) {
 
 func TestGetUserWithoutAccess(t *testing.T) {
 	controller := &controller{
-		jwtSecret: "",
+		jwtSecret: "Secret",
 		users:     users,
 	}
 	target := controller.getRouter()
@@ -71,7 +83,7 @@ func TestGetUserWithoutAccess(t *testing.T) {
 
 func TestHealthz(t *testing.T) {
 	controller := &controller{
-		jwtSecret: "",
+		jwtSecret: "Secret",
 		users:     users,
 	}
 	target := controller.getRouter()
@@ -87,7 +99,7 @@ func TestHealthz(t *testing.T) {
 
 func TestPostUser(t *testing.T) {
 	controller := &controller{
-		jwtSecret: "",
+		jwtSecret: "Secret",
 		users:     users,
 	}
 	target := controller.getRouter()
@@ -97,7 +109,7 @@ func TestPostUser(t *testing.T) {
 		Email:     "tester@spexflix.se",
 		SpexYears: 10,
 	})
-	req := httptest.NewRequest("POST", "/users/", body)
+	req := httptest.NewRequest("POST", "/users", body)
 	req.Header.Add("Authorization", "Bearer "+token)
 	requestRecorder := httptest.NewRecorder()
 
@@ -113,7 +125,7 @@ func TestPostUser(t *testing.T) {
 
 func TestPostUserUnAuthorized(t *testing.T) {
 	controller := &controller{
-		jwtSecret: "",
+		jwtSecret: "Secret",
 		users:     users,
 	}
 	target := controller.getRouter()
@@ -123,7 +135,7 @@ func TestPostUserUnAuthorized(t *testing.T) {
 		Email:     "tester@spexflix.se",
 		SpexYears: 10,
 	})
-	req := httptest.NewRequest("POST", "/users/", body)
+	req := httptest.NewRequest("POST", "/users", body)
 	req.Header.Add("Authorization", "Bearer "+token+"1")
 	requestRecorder := httptest.NewRecorder()
 
@@ -132,6 +144,46 @@ func TestPostUserUnAuthorized(t *testing.T) {
 
 	// Then
 	assert.Equal(t, http.StatusUnauthorized, requestRecorder.Code)
+}
+
+func TestGetIdFromEmail(t *testing.T) {
+	controller := &controller{
+		jwtSecret: "Secret",
+		users:     users,
+	}
+	target := controller.getRouter()
+	req := httptest.NewRequest("GET", "/users?email=" + email, nil)
+	req.Header.Add("Authorization", "Bearer "+token)
+	requestRec := httptest.NewRecorder()
+
+	// When
+	target.ServeHTTP(requestRec, req)
+
+	// Then
+	var rsp []User
+	codecs.JSON.Decode(requestRec.Body, &rsp)
+	println(requestRec.Body.String())
+	assert.Equal(t, http.StatusOK, requestRec.Code)
+	assert.Equal(t, 1, len(rsp))
+	assert.NotNil(t, rsp[0])
+	assert.Equal(t, email, rsp[0].Email)
+}
+
+func TestGetIdFromEmailIsProtoceted(t *testing.T) {
+	controller := &controller{
+		jwtSecret: "Secret",
+		users:     users,
+	}
+	target := controller.getRouter()
+	req := httptest.NewRequest("GET", "/users?email=" + email, nil)
+	req.Header.Add("Authorization", "Bearer " + token + "1")
+	requestRec := httptest.NewRecorder()
+
+	// When
+	target.ServeHTTP(requestRec, req)
+
+	// Then
+	assert.Equal(t, http.StatusUnauthorized, requestRec.Code)
 }
 
 func TestUserValidationn(t *testing.T) {

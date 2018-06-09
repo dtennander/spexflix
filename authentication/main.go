@@ -28,7 +28,7 @@ func main() {
 }
 
 func newAuthenticator() server.Authenticator {
-	au := &authentication.JctAuthenticator{
+	au := &authentication.JwtAuthenticator{
 		Secret:          jwtSecret,
 		SessionDuration: 7 * 24 * time.Hour,
 	}

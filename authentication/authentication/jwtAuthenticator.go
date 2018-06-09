@@ -7,12 +7,12 @@ import (
 	"time"
 )
 
-type JctAuthenticator struct {
+type JwtAuthenticator struct {
 	Secret          string
 	SessionDuration time.Duration
 }
 
-func (a *JctAuthenticator) Login(username string, password string) (token string, err error) {
+func (a *JwtAuthenticator) Login(username string, password string) (token string, err error) {
 	if !a.authenticate(username, password) {
 		return "", errors.New("invalid password")
 	}
@@ -27,11 +27,11 @@ func (a *JctAuthenticator) Login(username string, password string) (token string
 	return t.SignedString([]byte(a.Secret))
 }
 
-func (a *JctAuthenticator) getSecret(token *jwt.Token) (interface{}, error) {
+func (a *JwtAuthenticator) getSecret(token *jwt.Token) (interface{}, error) {
 	return []byte(a.Secret), nil
 }
 
-func (a *JctAuthenticator) AuthenticateSession(tokenString string) (username *string) {
+func (a *JwtAuthenticator) AuthenticateSession(tokenString string) (username *string) {
 	token, err := jwt.ParseWithClaims(tokenString, &jwt2.SessionClaims{}, a.getSecret)
 	if err != nil || !token.Valid {
 		return nil
@@ -40,6 +40,6 @@ func (a *JctAuthenticator) AuthenticateSession(tokenString string) (username *st
 	return &name
 }
 
-func (jctAuthenticator *JctAuthenticator) authenticate(username string, password string) bool {
-	return username == "admin" && password == "kakakaka"
+func (a *JwtAuthenticator) authenticate(email string, password string) bool {
+	return email == "admin" && password == "kakakaka"
 }
