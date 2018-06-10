@@ -84,7 +84,6 @@ metadata:
 spec:
   selector:
     app: users
-  type: NodePort
   ports:
   - name: web
     protocol: TCP
