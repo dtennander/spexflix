@@ -38,12 +38,18 @@ class Home extends Component {
 
     onSuccessfulLogout() {
         localStorage.removeItem("jwtToken");
-        this.setState({isLoggedIn: false});
+        this.setState({
+            isLoggedIn: false,
+            jwtToken: null,
+        });
     }
 
     onSuccessfulLogIn(token) {
         localStorage.setItem("jwtToken", token);
-        this.setState({isLoggedIn: true})
+        this.setState({
+            isLoggedIn: true,
+            jwtToken: token,
+        })
     }
 }
 
