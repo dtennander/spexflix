@@ -152,3 +152,15 @@ go_repository(
     commit = "22bbf0ddf08105dfa364d0a2fa619dfa71014af5",
     importpath = "github.com/golang/mock",
 )
+
+go_repository(
+    name = "com_github_googleapis_gax_go",
+    commit = "254b60fe060127b9fd3c420fadd0906bf0382227",
+    importpath = "github.com/googleapis/gax-go",
+)
+
+go_repository(
+    name = "io_opencensus_go",
+    commit = "6edeb78af2d9e4f169abb223feaef35da2e45d06",
+    importpath = "go.opencensus.io",
+)

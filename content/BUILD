@@ -6,11 +6,7 @@ go_library(
     srcs = ["main.go"],
     importpath = "github.com/DiTo04/spexflix/content",
     visibility = ["//visibility:private"],
-    deps = [
-        "//common/codecs:go_default_library",
-        "//content/content:go_default_library",
-        "//content/server:go_default_library",
-    ],
+    deps = ["//content/server:go_default_library"],
 )
 
 go_image(

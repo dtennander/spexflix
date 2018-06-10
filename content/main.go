@@ -1,30 +1,22 @@
 package main
 
 import (
-	"github.com/DiTo04/spexflix/common/codecs"
-	"github.com/DiTo04/spexflix/content/content"
 	"github.com/DiTo04/spexflix/content/server"
-	"log"
 	"net/http"
 	"os"
-	"time"
 )
 
 var (
-	authAddress = os.Getenv("AUTHENTICATION_SERVER")
-	authPort    = os.Getenv("AUTHENTICATION_PORT")
+	jwtSecret = os.Getenv("JWT_SECRET")
 	serverPort  = os.Getenv("SERVER_PORT")
+	bucketName = os.Getenv("MEDIA_BUCKET_NAME")
 )
 
 func main() {
-	logger := log.New(os.Stdout, "INFO: ", log.Ltime|log.Ldate|log.Lshortfile)
-	auClient := &server.JwtMiddleware{
-		Codec:       codecs.JSON,
-		AuthAddress: authAddress + ":" + authPort,
-		Client:      &http.Client{Timeout: 1 * time.Second},
+	controller, err := server.CreateController(jwtSecret, bucketName)
+	if err != nil {
+		panic(err)
 	}
-	provider := &content.Provider{}
-	server.New(
-		provider, auClient, logger, codecs.JSON, "0.0.0.0", serverPort).
-		StartServer()
+	routes := controller.CreateRoutes()
+	http.ListenAndServe("0.0.0.0:" + serverPort, routes)
 }

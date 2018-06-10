@@ -44,13 +44,27 @@ spec:
           initialDelaySeconds: 15
           timeoutSeconds: 1
           periodSeconds: 15
+        volumeMounts:
+        - name: bucket-instance-credentials
+          mountPath: /secrets/bucket
+          readOnly: true
         env:
-        - name: AUTHENTICATION_SERVER
-          value: "authentication"
-        - name: AUTHENTICATION_PORT
-          value: "8080"
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
+        - name: MEDIA_BUCKET_NAME
+          value: "spexflix-movies"
         - name: SERVER_PORT
           value: "8080"
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: "/secrets/bucket/credentials.json"
+      volumes:
+        - name: bucket-instance-credentials
+          secret:
+            secretName: bucket-instance-credentials
+
 ---
 kind: Service
 apiVersion: v1
