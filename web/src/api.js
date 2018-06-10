@@ -17,6 +17,25 @@ const Api = {
         return response.data;
     },
 
+    GetAllMovies: async function(jwtToken) {
+        const url = uriPrefix + "/movies";
+        console.log(url);
+        const config = {headers: {Authorization: "Bearer " + jwtToken}};
+        const response = await axios.get(url, config);
+        let allMovies = await Promise.all(response.data.map(year => {
+            const y = year.Year;
+            return axios.get(uriPrefix + year.Uri, config)
+                .then(movieRsp => movieRsp.data)
+                .then(array => {
+                    return {year:y, array: array}
+                })
+        }));
+        let movies = {};
+        allMovies.forEach(yearList =>
+            movies[yearList.year] = yearList.array);
+        return movies;
+    },
+
 };
 
 export default Api;
