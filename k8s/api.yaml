@@ -49,6 +49,8 @@ spec:
           value: "http://authentication:8080"
         - name: USER_SERVICE
           value: "http://users:8080"
+        - name: CONTENT_SERVICE
+          value: "http://content:8080"
         - name: PORT
           value: "8080"
 ---

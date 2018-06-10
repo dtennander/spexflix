@@ -16,6 +16,7 @@ const apiPrefix = "/api/v1"
 
 var (
 	usersServiceUrl = os.Getenv("USER_SERVICE")
+	contentServiceUrl = os.Getenv("CONTENT_SERVICE")
 	authService = os.Getenv("AUTHENTICATION_SERVICE")
 	port        = os.Getenv("PORT")
 )
@@ -44,6 +45,7 @@ func main() {
 		HandlerFunc(makeHandlePostLogin(auClient, logger))
 
 	apiRouter.PathPrefix("/users").HandlerFunc(proxyTo(usersServiceUrl))
+	apiRouter.PathPrefix("/movies").HandlerFunc(proxyTo(contentServiceUrl))
 
 	r.PathPrefix(apiPrefix).Handler(apiRouter)
 	r.HandleFunc("/healthz", healthz)
