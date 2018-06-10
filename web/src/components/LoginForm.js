@@ -44,7 +44,7 @@ class LoginForm extends Component {
                         <td width="100px">
                             <InputField
                                 ref={this.email}
-                                type="text"
+                                type="email"
                                 name="email"
                                 placeholder="e-post"
                                 onEnter={this.login}

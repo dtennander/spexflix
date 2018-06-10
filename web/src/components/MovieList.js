@@ -1,7 +1,5 @@
 import React, {Component} from 'react';
 import Api from "../api";
-import {Player} from 'video-react';
-import 'video-react/dist/video-react.css'
 
 
 const playerStyle = {
@@ -39,7 +37,7 @@ class MovieList extends Component {
                 rows.push(
                     <div key={year + ":" + i} style={playerStyle}>
                         <h3>{movie.Name}</h3>
-                        <Player src={movie.Uri}/>
+                        <video controls mediaGroup="video" src={movie.Uri} style={{width:"100%"}}/>
                     </div>
                 );
             }
