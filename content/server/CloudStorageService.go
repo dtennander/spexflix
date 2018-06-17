@@ -66,8 +66,8 @@ func (c *cloudStorageService) getPosterUri(folder string, out chan <- string) {
 
 func gatherYearsFromChannel(nrOfItems int, channel <-chan *Year) ([]Year, error){
 	years := make([]Year, nrOfItems)
-	select {
-	case year := <- channel:
+	for {
+		year := <- channel
 		if year == nil {
 			return nil, errors.New("could not get metadata")
 		}
