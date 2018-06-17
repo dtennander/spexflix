@@ -2,6 +2,10 @@ import axios from 'axios';
 
 const uriPrefix = "/api/v1";
 
+function createConfig(jwtToken) {
+    return {headers: {Authorization: "Bearer " + jwtToken}};
+}
+
 const Api = {
 
     LogInUser: async function(email, password) {
@@ -17,11 +21,25 @@ const Api = {
         return response.data;
     },
 
-    GetAllMovies: async function(jwtToken) {
+    GetAllYears: async function(jwtToken) {
         const url = uriPrefix + "/movies";
+        const config = createConfig(jwtToken);
+        return await axios.get(url, config)
+    },
+
+
+    GetMovies: async function(year, jwtToken) {
+        const url = uriPrefix + "/movies/" + year;
+        const config = createConfig(jwtToken);
         console.log(url);
-        const config = {headers: {Authorization: "Bearer " + jwtToken}};
-        const response = await axios.get(url, config);
+        const rsp = await axios.get(url, config);
+        console.log(rsp);
+        return rsp.data
+    },
+
+    GetAllMovies: async function(jwtToken) {
+        const response = this.GetAllYears(jwtToken);
+        const config = createConfig(jwtToken);
         let allMovies = await Promise.all(response.data.map(year => {
             const y = year.Year;
             return axios.get(uriPrefix + year.Uri, config)

@@ -1,52 +1,70 @@
 import React, {Component} from 'react';
 import Api from "../api";
+import {Redirect} from "react-router";
+import Interactive from "react-interactive";
 
-
-const playerStyle = {
-    maxWidth: "800px",
+const movieCardOnHoverStyle = {
+    boxShadow: "0 20px 25px 0 rgba(0,0,0,0.19), 0 20px 25px 0 rgba(0,0,0,0.19)",
 };
+
+const movieCardStyle = {
+    boxShadow: "0 16px 18px 0 rgba(0,0,0,0.12), 0 19px 25px 0 rgba(0,0,0,0.09)",
+    background: "#fff",
+    transitionDuration: "0.3s",
+    padding:"1px 20px",
+    margin: "20px 0px",
+};
+
 
 class MovieList extends Component {
 
     constructor(props){
         super(props);
         this.state = {
-            movies: []
+            years: [],
+            redirect: null,
         }
     }
 
     componentDidMount() {
-        Api.GetAllMovies(this.props.token)
-            .then(movies => {
-                this.setState({movies: movies});
-            })
+        Api.GetAllYears(this.props.token)
+            .then(years => {
+                console.log(years.data);
+                this.setState({years: years.data});
+            });
     }
 
     render() {
-        let rows = [];
-        console.log(this.state.movies);
-        for (let year in this.state.movies) {
-            let movies = this.state.movies[year];
-            if (movies == null) {
-                continue
-            }
-            console.log(movies);
-            rows.push(<h2 key={year}>{year}</h2>);
-            for (let i in movies) {
-                const movie = movies[i];
-                rows.push(
-                    <div key={year + ":" + i} style={playerStyle}>
-                        <h3>{movie.Name}</h3>
-                        <video controls mediaGroup="video" src={movie.Uri} style={{width:"100%"}}/>
-                    </div>
-                );
-            }
+        if (this.state.redirect) {
+            return <Redirect push to={"/" + this.state.redirect}/>;
         }
-        return (
-            <div>
-                {rows}
-            </div>
-        )
+        let rows = [];
+        for (let i in this.state.years) {
+           const year = this.state.years[i];
+           rows.push(
+               <Interactive
+                   as="div"
+                   key={i}
+                   hover={movieCardOnHoverStyle}
+                   style={movieCardStyle}
+                   onClick={() => this.setState({redirect: year.year})}>
+                   <h2 >{year.name} <i>{"eller " + year.eller}</i> ({year.year})</h2>
+                   <table key={"table" + i} style={{width: "100%"}}>
+                       <tbody>
+                       <tr>
+                           <td width="200px">
+                               <img width="100%" src={year.poster_uri} alt="poster"/>
+                           </td>
+                           <td style={{verticalAlign: "top", padding:"10px 20px"}}>
+                               {year.description}
+                           </td>
+                       </tr>
+                       </tbody>
+                   </table>
+               </Interactive>
+           );
+        }
+        return rows
     }
 }
 
