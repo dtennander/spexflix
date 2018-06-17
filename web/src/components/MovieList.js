@@ -48,7 +48,7 @@ class MovieList extends Component {
                    hover={movieCardOnHoverStyle}
                    style={movieCardStyle}
                    onClick={() => this.setState({redirect: year.year})}>
-                   <h2 >{year.name} <i>{"eller " + year.eller}</i> ({year.year})</h2>
+                   <h2 >{year.name}<br/><i>{"eller " + year.eller}</i> ({year.year})</h2>
                    <table key={"table" + i} style={{width: "100%"}}>
                        <tbody>
                        <tr>
