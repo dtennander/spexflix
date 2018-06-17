@@ -16,6 +16,10 @@ class Home extends Component {
         this.onSuccessfulLogIn = this.onSuccessfulLogIn.bind(this);
     }
 
+    componentDidMount() {
+        document.title = "Spexflix"
+    }
+
     render() {
         if (!this.state.isLoggedIn) {
             return (<div>

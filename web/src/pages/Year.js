@@ -3,7 +3,7 @@ import Header from '../components/Header'
 import {Redirect} from "react-router";
 import MovieView from "../components/MovieView";
 
-class Home extends Component {
+class Year extends Component {
 
     constructor(props) {
         super(props);
@@ -15,6 +15,10 @@ class Home extends Component {
         console.log(props);
         this.onSuccessfulLogout = this.onSuccessfulLogout.bind(this);
         this.onSuccessfulLogIn = this.onSuccessfulLogIn.bind(this);
+    }
+
+    componentDidMount() {
+        document.title = document.title + " | " + this.props.match.params.year;
     }
 
     render() {
@@ -53,4 +57,4 @@ function getJwtToken() {
     return localStorage.getItem("jwtToken")
 }
 
-export default Home;
+export default Year;
