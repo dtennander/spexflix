@@ -28,8 +28,8 @@ class MovieList extends Component {
 
     componentDidMount() {
         Api.GetAllYears(this.props.token)
+            .then(years => years.sort((y1, y2) => y2.year - y1.year))
             .then(years => {
-                console.log(years);
                 this.setState({years: years});
             });
     }
