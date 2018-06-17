@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import logo from '../images/luva.svg'
 import LoginForm from "./LoginForm";
 import Button from "./Button";
+import {Link} from "react-router-dom";
 
 const mainStyle = {
     textAlign: "left",
@@ -56,11 +57,15 @@ class Header extends Component {
         let result = {};
         if (this.isCentered()) {
             result = {
-                textAlign: "center"
+                textAlign: "center",
+                color: "#f1eb00",
+                textDecoration: "none",
             };
         } else {
             result = {
-                float: e
+                float: e,
+                color: "#f1eb00",
+                textDecoration: "none",
             };
         }
         return result;
@@ -88,12 +93,12 @@ class Header extends Component {
         return (
             <div style={mainStyle}>
                 <header style={this.getHeaderStyle()}>
-                    <div style={this.getCenterIfSmallElse("left")}>
+                    <Link style={this.getCenterIfSmallElse("left")} to="/">
                         <h1 style={titleStyle}>
                             <img style={logoStyle} src={logo} alt="logo" />
                             Spexflix
                         </h1>
-                    </div>
+                    </Link>
                     <LeftDiv/>
                 </header>
             </div>
