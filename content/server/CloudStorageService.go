@@ -88,20 +88,36 @@ func (c *cloudStorageService) GetContent(ctx context.Context, year string) ([]Mo
 	iterator := c.client.Objects(ctx, query)
 	var movies []Movie
 	for {
-		folder, err := iterator.Next()
+		file, err := iterator.Next()
 		if err == iterator2.Done {
 			break
 		} else if err != nil {
 			return nil, err
 		}
-		if !strings.Contains(folder.ContentType, "video") {
+		if !strings.Contains(file.ContentType, "video") {
 			continue
 		}
-		split := strings.Split(folder.Name, "/")
-		folderName := split[len(split) - 1]
-		movie := Movie{Name: folderName, Uri: folder.MediaLink}
+
+		name := getName(file)
+		description := getDescription(file)
+		movie := Movie{Name: name, Uri: file.MediaLink, Description: description}
 		movies = append(movies, movie)
 	}
 	return movies, nil
+}
+
+func getDescription(file *storage.ObjectAttrs) string {
+	if description, ok := file.Metadata["description"]; ok {
+		return description
+	}
+	return "Not yet written"
+}
+
+func getName(file *storage.ObjectAttrs) string {
+	if name, ok := file.Metadata["name"]; ok {
+		return name
+	}
+	split := strings.Split(file.Name, "/")
+	return split[len(split) - 1]
 }
 
