@@ -52,18 +52,19 @@ const Movies = (props) => {
     for (let i in props.movies) {
         const movie = props.movies[i];
         views.push(
-            <div key={i} style={{display: "flex", flexDirection: "row"}}>
-                <div >
-                    <h3 style={{margin: "10px 0px"}}>{movie.name}</h3>
-                    <video style={movieStyle} controls mediaGroup="video" src={movie.uri}/>
-                    <p>
-                        {movie.description}
-                    </p>
-                </div>
+            <div key={i} style={{width: "200px", margin:"10px"}}>
+                <h3 style={{margin: "10px 0px"}}>{movie.name}</h3>
+                <video style={movieStyle} controls mediaGroup="video" src={movie.uri}/>
+                <p>
+                    {movie.description}
+                </p>
             </div>
         )
     }
-    return views;
+    return (
+        <div style={{display: "flex", flexDirection: "row"}}>
+            {views}
+        </div>);
 };
 
 class MovieView extends Component{
