@@ -12,16 +12,18 @@ import (
 )
 
 type Year struct {
-	Year string
-	Name string
-	Description string
-	Uri  string
+	Year string `json:"year"`
+	Name string `json:"name"`
+	Eller string `json:"eller"`
+	Description string `json:"description"`
+	PosterUri string `json:"poster_uri"`
+	Uri  string `json:"uri"`
 }
 
 type Movie struct {
-	Name string
-	Description string
-	Uri string
+	Name string `json:"name"`
+	Description string `json:"description"`
+	Uri string `json:"uri"`
 }
 
 type StorageService interface {
