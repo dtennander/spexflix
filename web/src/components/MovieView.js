@@ -57,7 +57,7 @@ const Movies = (props) => {
                     <h3 style={{margin: "10px 0px"}}>{movie.name}</h3>
                     <video style={movieStyle} controls mediaGroup="video" src={movie.uri}/>
                     <p>
-                        asdasdasd{movie.description}
+                        {movie.description}
                     </p>
                 </div>
             </div>
