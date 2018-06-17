@@ -29,8 +29,8 @@ class MovieList extends Component {
     componentDidMount() {
         Api.GetAllYears(this.props.token)
             .then(years => {
-                console.log(years.data);
-                this.setState({years: years.data});
+                console.log(years);
+                this.setState({years: years});
             });
     }
 

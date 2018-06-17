@@ -24,7 +24,8 @@ const Api = {
     GetAllYears: async function(jwtToken) {
         const url = uriPrefix + "/movies";
         const config = createConfig(jwtToken);
-        return await axios.get(url, config)
+        const rsp = await axios.get(url, config);
+        return rsp.data
     },
 
 
@@ -40,7 +41,7 @@ const Api = {
     GetAllMovies: async function(jwtToken) {
         const response = this.GetAllYears(jwtToken);
         const config = createConfig(jwtToken);
-        let allMovies = await Promise.all(response.data.map(year => {
+        let allMovies = await Promise.all(response.map(year => {
             const y = year.Year;
             return axios.get(uriPrefix + year.Uri, config)
                 .then(movieRsp => movieRsp.data)
