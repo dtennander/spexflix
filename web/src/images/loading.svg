@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    enable-background="new"
+    id="svg64"
+    version="1.1"
+    width="100%"
+    height="100%"
+    viewBox="0 0 100 100"
+    preserveAspectRatio="xMidYMid"
+    class="lds-eclipse">
+   <path
+       stroke="none"
+       d="M10 50A40 40 0 0 0 90 50A40 42 0 0 1 10 50"
+       fill="#962528">
+      <animateTransform
+              attributeName="transform"
+              type="rotate"
+              calcMode="linear"
+              values="0 50 51;360 50 51"
+              keyTimes="0;1"
+              dur="1.3s"
+              begin="0s"
+              repeatCount="indefinite">
+      </animateTransform>
+   </path>
+</svg>

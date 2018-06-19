@@ -21,23 +21,15 @@ class Home extends Component {
     }
 
     render() {
-        if (!this.state.isLoggedIn) {
-            return (<div>
-                <Header
-                    isLoggedIn={false}
-                    onSuccessfulLogIn={this.onSuccessfulLogIn}/>
-                <CreateAccount/>
+        return (
+            <div>
+                <Header isLoggedIn={this.state.isLoggedIn}
+                        onSuccessfulLogout={this.onSuccessfulLogout}
+                        onSuccessfulLogIn={this.onSuccessfulLogIn}/>
+                {this.state.isLoggedIn
+                    ? <HomeView token={this.state.jwtToken}/>
+                    : <CreateAccount/> }
             </div>);
-        } else {
-            return (
-                <div>
-                    <Header
-                        isLoggedIn={true}
-                        onSuccessfulLogout={this.onSuccessfulLogout}/>
-                    <HomeView token={this.state.jwtToken}/>
-                </div>
-            );
-        }
     }
 
     onSuccessfulLogout() {

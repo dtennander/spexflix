@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import Api from "../api";
 import {Redirect} from "react-router";
 import Interactive from "react-interactive";
 
@@ -21,17 +20,8 @@ class MovieList extends Component {
     constructor(props){
         super(props);
         this.state = {
-            years: [],
             redirect: null,
         }
-    }
-
-    componentDidMount() {
-        Api.GetAllYears(this.props.token)
-            .then(years => years.sort((y1, y2) => y2.year - y1.year))
-            .then(years => {
-                this.setState({years: years});
-            });
     }
 
     render() {
@@ -39,8 +29,8 @@ class MovieList extends Component {
             return <Redirect push to={"/" + this.state.redirect}/>;
         }
         let rows = [];
-        for (let i in this.state.years) {
-           const year = this.state.years[i];
+        for (let i in this.props.years) {
+           const year = this.props.years[i];
            rows.push(
                <Interactive
                    as="div"

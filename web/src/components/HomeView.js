@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import Api from "../api";
-import jwtDecode from 'jwt-decode'
 import MovieList from "./MovieList";
+import Spinner from "./Spinner";
 
 const headerStyle = {
     margin: "20px",
@@ -12,28 +12,22 @@ class HomeView extends Component{
     constructor(props) {
         super(props);
         this.state = {
-            user: {},
-            tokenData: {},
+            years: [],
         }
     }
 
     componentDidMount() {
-        try {
-            const tokenData = jwtDecode(this.props.token);
-            this.setState({tokenDate: tokenData});
-            Api.GetUser(tokenData.id, this.props.token)
-                .then(user => this.setState({user: user}))
-                .catch(error => console.log("Could not load user. ", error))
-        } catch(error) {
-            console.log(error)
-        }
+        Api.GetAllYears(this.props.token)
+            .then(years => years.sort((y1, y2) => y2.year - y1.year))
+            .then(years => this.setState({years: years}));
     }
 
     render() {
         return (
             <div style={headerStyle}>
-                <h1>Välkommen {this.state.user.name}!</h1>
-                <MovieList token={this.props.token}/>
+            {this.state.years.length > 0
+                ? <MovieList years={this.state.years}/>
+                : <Spinner/> }
             </div>
         )
     }
