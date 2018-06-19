@@ -26,7 +26,7 @@ class InputField  extends Component {
     }
 
     getStyle() {
-        return {...inputStyle, ...this.props.style}
+        return this.props.style || inputStyle;
     }
 
     render() {
@@ -47,6 +47,10 @@ class InputField  extends Component {
             this.props.onEnter();
             return
         }
+        if (event.key === "Escape" && typeof this.props.onEscape !== 'undefined') {
+            this.props.onEscape();
+            return
+        }
         this.setState({
             inputValue: event.target.value
         })
@@ -54,6 +58,10 @@ class InputField  extends Component {
 
     getInput() {
         return this.state.inputValue
+    }
+
+    clearField() {
+        this.setState({inputValue: ""})
     }
 }
 
