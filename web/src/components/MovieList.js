@@ -12,6 +12,9 @@ const movieCardStyle = {
     transitionDuration: "0.3s",
     padding:"1px 20px",
     margin: "20px 0px",
+    maxWidth: "950px",
+    marginLeft: "auto",
+    marginRight: "auto",
 };
 
 
