@@ -36,8 +36,8 @@ type controller struct {
 	jwtSecret string
 }
 
-func CreateController(jwtSecret string, bucketName string) (*controller, error) {
-	storageService, err := createStorageService(bucketName)
+func CreateController(jwtSecret string, bucketName string, keyFilePath string) (*controller, error) {
+	storageService, err := createStorageService(bucketName, keyFilePath)
 	if err != nil {
 		return nil, err
 	}
@@ -47,15 +47,17 @@ func CreateController(jwtSecret string, bucketName string) (*controller, error) 
 	}, nil
 }
 
-func createStorageService(bucketName string) (*cloudStorageService, error) {
+func createStorageService(bucketName string, keyFilePath string) (*cloudStorageService, error) {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return nil, err
 	}
 	bucket := client.Bucket(bucketName)
+	urlSigner := &CloudStorageUrlSigner{KeyFilePath: keyFilePath}
 	storageService := &cloudStorageService{
 		client: bucket,
+		urlSigner: urlSigner,
 	}
 	return storageService, nil
 }

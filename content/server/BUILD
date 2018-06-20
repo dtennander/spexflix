@@ -4,6 +4,7 @@ go_library(
     name = "go_default_library",
     srcs = [
         "CloudStorageService.go",
+        "CloudStorageUrlSigner.go",
         "controller.go",
         "controller_mocks.go",
     ],

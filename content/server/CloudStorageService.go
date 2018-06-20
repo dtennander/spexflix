@@ -10,9 +10,13 @@ import (
 	"errors"
 )
 
+type UrlSigner interface {
+	createUrl(file *storage.ObjectAttrs, method string) (string, error)
+}
+
 type cloudStorageService struct {
 	client *storage.BucketHandle
-	bucketName string
+	urlSigner UrlSigner
 }
 
 func (c *cloudStorageService) GetYears(ctx context.Context) ([]Year, error) {
@@ -100,7 +104,11 @@ func (c *cloudStorageService) GetContent(ctx context.Context, year string) ([]Mo
 
 		name := getName(file)
 		description := getDescription(file)
-		movie := Movie{Name: name, Uri: file.MediaLink, Description: description}
+		url, err := c.urlSigner.createUrl(file, "GET")
+		if err != nil {
+			return nil, err
+		}
+		movie := Movie{Name: name, Uri: url, Description: description}
 		movies = append(movies, movie)
 	}
 	return movies, nil
