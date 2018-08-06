@@ -64,14 +64,17 @@ func (s *server) StopServer(timeout time.Duration) {
 
 func (s *server) createRouter() http.Handler {
 	router := mux.NewRouter()
-	router.NewRoute().
+	router.
 		Path("/session/{token}").
 		Methods("POST").
 		HandlerFunc(s.handlePostSession)
-	router.NewRoute().
+	router.
 		Path("/login").
 		Methods("POST").
 		HandlerFunc(s.handlePostLogin)
+	router.
+		Path("/healthz").
+		HandlerFunc(s.handleHealthz)
 
 	s.middleware.UseHandler(router)
 	return s.middleware
@@ -103,4 +106,8 @@ func (s *server) handlePostLogin(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 	s.codec.Encode(writer, token)
+}
+
+func (s *server) handleHealthz(writer http.ResponseWriter, request *http.Request) {
+	s.codec.Encode(writer, "Everything is fine!")
 }

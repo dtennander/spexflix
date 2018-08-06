@@ -155,3 +155,18 @@ func TestLoginFailure(t *testing.T) {
 	validateResponse(
 		t, res, http.StatusForbidden, "Wrong username and password!\n")
 }
+
+func TestHealthz(t *testing.T) {
+	// Given
+	server, client := setUp()
+	defer server.StopServer(1 * time.Second)
+
+	// When
+	rsp, err := client.Get(ServerAddress + "/healthz")
+	if err != nil {
+		t.Fatal("Could not send request to /healthz")
+	}
+
+	// Then
+	validateResponse(t, rsp, http.StatusOK, "\"Everything is fine!\"\n")
+}
